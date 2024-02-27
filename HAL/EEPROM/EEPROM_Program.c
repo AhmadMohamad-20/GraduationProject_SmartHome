@@ -5,13 +5,17 @@
  *      Author: hp
  */
 #include <util/delay.h>
-#include "STD.h"
-#include "BIT_MATH.h"
-#include "IIC_Interface.h"
+#include "../../LIBRARIES/STD_Types.h"
+#include "../../LIBRARIES/bitmath.h"
+
+#include "../../MCAL/DIO/DIO_Interface.h"
+
+#include "../../MCAL/IIC/IIC_Interface.h"
+
 #include "EEPROM_Config.h"
 #include "EEPROM_Interface.h"
 #include "EEPROM_Private.h"
-#include "IIC_Registers.h"
+//#include "IIC_Registers.h"
 
 void EEPROM_voidSendDataByte(uint16 Copy_uint16LocationAddress, uint8 Copy_uint8DataByte)
 {
