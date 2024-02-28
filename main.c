@@ -22,15 +22,18 @@ int main(void)
 	//LCD_init4bit();
 	LCD_init_4bit();
 
+	loginToSystem();
 	while(1)
 	{
-		loginToSystem();
+
 	}
 }
 
 void loginToSystem(void)
 {
 	uint8 localButtonVal = 0;
+	char password[4] = {0};
+	uint8 counter = 0;
 	LCD_clearDisplay_4bit(LCD_DATA_PORT);
 	LCD_sendString_4bit(LCD_DATA_PORT,"1 => ADMIN MODE");
 	LCD_setCursorAt_4bit(LCD_DATA_PORT,LCD_ROW2,1);
@@ -41,8 +44,18 @@ void loginToSystem(void)
 		localButtonVal = KEYPAD_getValue();
 	}
 	LCD_clearDisplay_4bit(LCD_DATA_PORT);
-	//LCD_setCursorAt_4bit(LCD_DATA_PORT,8,LCD_ROW1);
-	//LCD_sendString_4bit(LCD_DATA_PORT," PASSWORD");
-	LCD_sendStringAtAddress_4bit(LCD_DATA_PORT,LCD_ROW1,5,"PASSWORD");
-
+	LCD_setCursorAt_4bit(LCD_DATA_PORT,LCD_ROW1,4);
+	LCD_sendString_4bit(LCD_DATA_PORT," PASSWORD");
+	LCD_setCursorAt_4bit(LCD_DATA_PORT,LCD_ROW2,6);
+	LCD_sendCommand_4bit(LCD_DATA_PORT,0b00001101);
+	for (;counter < 4; counter++)
+	{
+		localButtonVal = KEYPAD_getValue();
+		while (((localButtonVal == BUTTON_NOT_PRESSED) || (localButtonVal == '*') || (localButtonVal == '#')))
+		{
+			localButtonVal = KEYPAD_getValue();
+		}
+		password[counter] = localButtonVal;
+		LCD_sendData_4bit(LCD_DATA_PORT,'*');
+	}
 }
