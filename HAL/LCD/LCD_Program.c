@@ -17,6 +17,26 @@ static char string[3] = "000";
 
 static uint8 DIO_set4bitsValue(uint8 copy_DIO_PORT, uint8 copy_DIO_value);
 static void convertNumToString(uint8 copy_num);
+
+void LCD_init8bit(void)
+{
+	DIO_setPinValue(LCD_CONTROL_PORT,LCD_RS_PIN,LOW);
+	DIO_setPinValue(LCD_CONTROL_PORT,LCD_RW_PIN,LOW);
+	DIO_setPortValue(LCD_DATA_PORT,PORT_OUTPUT);
+	DIO_setPinValue(LCD_CONTROL_PORT,LCD_ENABLE_PIN,HIGH);
+}
+
+void LCD_init4bit(void)
+{
+	DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN0,OUTPUT);
+	DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN1,OUTPUT);
+	DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN2,OUTPUT);
+	DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN3,OUTPUT);
+
+	DIO_setPinDirection(LCD_CONTROL_PORT,LCD_RS_PIN,OUTPUT);
+	DIO_setPinDirection(LCD_CONTROL_PORT,LCD_RW_PIN,OUTPUT);
+	DIO_setPinDirection(LCD_CONTROL_PORT,LCD_ENABLE_PIN,OUTPUT);
+}
 uint8 LCD_sendCommand_8bit(uint8 copy_LCD_port, uint8 copy_LCD_command)
 {
 	uint8 local_errorSignal = OK_STAT;
@@ -169,14 +189,14 @@ uint8 LCD_sendData_4bit(uint8 copy_LCD_port, uint8 copy_LCD_data)
 uint8 LCD_init_4bit(void)
 {
 	uint8 local_errorSignal = OK_STAT;
-	/*local_errorSignal = DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN0,OUTPUT);
+	local_errorSignal = DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN0,OUTPUT);
 	local_errorSignal = DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN1,OUTPUT);
 	local_errorSignal = DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN2,OUTPUT);
 	local_errorSignal = DIO_setPinDirection(LCD_DATA_PORT,LCD_DATA_4BIT_PIN3,OUTPUT);
 
 	local_errorSignal = DIO_setPinDirection(LCD_CONTROL_PORT,LCD_RS_PIN,OUTPUT);
 	local_errorSignal = DIO_setPinDirection(LCD_CONTROL_PORT,LCD_RW_PIN,OUTPUT);
-	local_errorSignal = DIO_setPinDirection(LCD_CONTROL_PORT,LCD_ENABLE_PIN,OUTPUT);*/
+	local_errorSignal = DIO_setPinDirection(LCD_CONTROL_PORT,LCD_ENABLE_PIN,OUTPUT);
 	_delay_ms(35);
 	local_errorSignal = LCD_sendCommand_4bit(LCD_DATA_PORT,(FUNCTION_SET_4BIT >> 4));
 	local_errorSignal = LCD_sendCommand_4bit(LCD_DATA_PORT,FUNCTION_SET_4BIT);
@@ -232,29 +252,29 @@ uint8 LCD_sendStringAtAddress_4bit(uint8 copy_LCD_port, uint8 copy_LCD_row, uint
 {
 	uint8 local_errorSignal = OK_STAT;
 
-			if (copy_LCD_column <= 16)
-			{
-				copy_LCD_column--;
-				switch (copy_LCD_row)
-				{
-					case 1:
-						local_errorSignal = LCD_sendCommand_4bit(copy_LCD_port,(0x80 + copy_LCD_column));
-						break;
-					case 2:
-						local_errorSignal = LCD_sendCommand_4bit(copy_LCD_port,(0xc0 + copy_LCD_column));
-						break;
-					default:
-						local_errorSignal = NOT_OK_STAT;
-						break;
-				}
-				local_errorSignal = LCD_sendString_4bit(copy_LCD_port,copy_LCD_string);
-			}
-			else
-			{
-				local_errorSignal = NOT_OK_STAT;
-			}
+	if (copy_LCD_column <= 16)
+	{
+		copy_LCD_column--;
+		switch (copy_LCD_row)
+		{
+		case 1:
+			local_errorSignal = LCD_sendCommand_4bit(copy_LCD_port,(0x80 + copy_LCD_column));
+			break;
+		case 2:
+			local_errorSignal = LCD_sendCommand_4bit(copy_LCD_port,(0xc0 + copy_LCD_column));
+			break;
+		default:
+			local_errorSignal = NOT_OK_STAT;
+			break;
+		}
+		local_errorSignal = LCD_sendString_4bit(copy_LCD_port,copy_LCD_string);
+	}
+	else
+	{
+		local_errorSignal = NOT_OK_STAT;
+	}
 
-			return local_errorSignal;
+	return local_errorSignal;
 }
 
 StdReturnType LCD_sendNumber_4Bit(uint8 copy_LCD_port, uint8 copy_LCD_num)
@@ -269,11 +289,41 @@ StdReturnType LCD_sendNumberAtAddress_4Bit(uint8 copy_LCD_port, uint8 copy_LCD_r
 	LCD_sendStringAtAddress_4bit(copy_LCD_port, copy_LCD_row, copy_LCD_column,string);
 }
 
-StdReturnType LCD_clearDisplay(uint8 copy_LCD_port)
+StdReturnType LCD_clearDisplay_4bit(uint8 copy_LCD_port)
 {
 	StdReturnType local_errorSignal = OK_STAT;
 	local_errorSignal = LCD_sendCommand_4bit(copy_LCD_port,DISPLAY_CLEAR);
+	LCD_sendCommand_4bit(copy_LCD_port,LCD_DDRAM_ROW2);
+	return local_errorSignal;
 }
+
+StdReturnType LCD_setCursorAt_4bit(uint8 copy_LCD_port, uint8 copy_LCD_row, uint8 copy_LCD_col)
+{
+	StdReturnType local_errorSignal = OK_STAT;
+
+	if (copy_LCD_col <= 16)
+	{
+		copy_LCD_col--;
+		switch (copy_LCD_row)
+		{
+		case LCD_ROW1:
+			LCD_sendCommand_4bit(copy_LCD_port,(LCD_DDRAM_ROW1 + copy_LCD_col));
+			break;
+		case LCD_ROW2:
+			LCD_sendCommand_4bit(copy_LCD_port,(LCD_DDRAM_ROW2 + copy_LCD_col));
+			break;
+		default:
+			local_errorSignal = NOT_OK_STAT;
+		}
+	}
+	else
+	{
+		local_errorSignal = NOT_OK_STAT;
+	}
+
+	return local_errorSignal;
+}
+
 static uint8 DIO_set4bitsValue(uint8 copy_DIO_PORT, uint8 copy_DIO_value)
 {
 	uint8 local_errorSignal = OK_STAT;

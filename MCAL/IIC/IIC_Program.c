@@ -16,8 +16,8 @@
 void TWI_InitMaster(uint8 Copy_uint8Address)
 {
 	/*set prescaler */
-	CLEARBIT(TWSR,TWSR_TWPS0);
-	CLEARBIT(TWSR,TWSR_TWPS1);
+	CLEAR_BIT(TWSR,TWSR_TWPS0);
+	CLEAR_BIT(TWSR,TWSR_TWPS1);
 
 	/*Clear status code*/
 	TWSR &=0x07;
@@ -41,7 +41,7 @@ void TWI_InitMaster(uint8 Copy_uint8Address)
 //	SETBIT(TWCR,TWCR_TWEA);      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/*Enable TWI*/
-	SETBIT(TWCR,TWCR_TWEN);
+	SET_BIT(TWCR,TWCR_TWEN);
 }
 
 
@@ -51,10 +51,10 @@ void TWI_InitSlave(uint8 Copy_uint8Address)
 	TWAR= Copy_uint8Address<<1;
 
 	/*Enable Acknowledge*/
-	SETBIT(TWCR,TWCR_TWEA);
+	SET_BIT(TWCR,TWCR_TWEA);
 
 	/*Enable TWI*/
-	SETBIT(TWCR,TWCR_TWEN);
+	SET_BIT(TWCR,TWCR_TWEN);
 }
 
 
@@ -62,11 +62,11 @@ TWI_ErrStatus TWI_SendStartCondition(void)
 {
 	TWI_ErrStatus LocalErrorStatus= NoError;
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*send start condition*/
-	SETBIT(TWCR,TWCR_TWSTA);
+	SET_BIT(TWCR,TWCR_TWSTA);
 	/*Wait for TWINT Flag set*/
-	while( (GETBIT(TWCR,TWCR_TWINT))  == 0);
+	while( (GET_BIT(TWCR,TWCR_TWINT))  == 0);
 	/*Check value of TWI Status Register*/
 	if ((TWSR & 0xF8) != START_ACK)
 	{
@@ -84,11 +84,11 @@ TWI_ErrStatus TWI_SendRepeatedStart(void)
 {
 	TWI_ErrStatus LocalErrorStatus= NoError;
 	/*send start condition*/
-	SETBIT(TWCR,TWCR_TWSTA);
+	SET_BIT(TWCR,TWCR_TWSTA);
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*Wait for TWINT Flag set*/
-	while( (GETBIT(TWCR,TWCR_TWINT))  == 0);
+	while( (GET_BIT(TWCR,TWCR_TWINT))  == 0);
 	/*Check value of TWI Status Register*/
 	if ((TWSR & 0xF8) != REP_START_ACK)
 	{
@@ -108,13 +108,13 @@ TWI_ErrStatus TWI_SendSlaveAddressWithWrite(uint8 Copy_uint8SlaveAddress)
 	/*send slave address*/
 	TWDR=Copy_uint8SlaveAddress<<1;
 	/*send write request*/
-	CLEARBIT(TWDR,0);
+	CLEAR_BIT(TWDR,0);
 	/*Clear the start condition bit*/
-	CLEARBIT(TWCR,TWCR_TWSTA);
+	CLEAR_BIT(TWCR,TWCR_TWSTA);
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*Wait for TWINT Flag set*/
-	while( (GETBIT(TWCR,TWCR_TWINT))  == 0);
+	while( (GET_BIT(TWCR,TWCR_TWINT))  == 0);
 	if( (TWSR & 0xF8) != SLAVE_ADD_AND_WR_ACK)
 	{
 		LocalErrorStatus=SlaveAddressWithWriteErr;
@@ -134,13 +134,13 @@ TWI_ErrStatus TWI_SendSlaveAddressWithRead(uint8 Copy_uint8SlaveAddress)
 	/*send slave address*/
 	TWDR=Copy_uint8SlaveAddress<<1;
 	/*send write request*/
-	SETBIT(TWDR,0);
+	SET_BIT(TWDR,0);
 	/*Clear the start condition bit*/
-	CLEARBIT(TWCR,TWCR_TWSTA);
+	CLEAR_BIT(TWCR,TWCR_TWSTA);
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*Wait for TWINT Flag set*/
-	while( (GETBIT(TWCR,TWCR_TWINT))  == 0);
+	while( (GET_BIT(TWCR,TWCR_TWINT))  == 0);
 	if( (TWSR & 0xF8) != SLAVE_ADD_AND_RD_ACK)
 	{
 		LocalErrorStatus= SlaveAddressWithReadErr;
@@ -159,9 +159,9 @@ TWI_ErrStatus TWI_MasterWriteDataByte(uint8 Copy_uint8DataByte)
 	TWDR= Copy_uint8DataByte;
 
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*Wait for TWINT Flag set*/
-	while( (GETBIT(TWCR,TWCR_TWINT))  == 0);
+	while( (GET_BIT(TWCR,TWCR_TWINT))  == 0);
 	if( (TWSR & 0xF8) != MSTR_WR_BYTE_ACK)
 	{
 		LocalErrorStatus= MasterWriteByteErr ;
@@ -179,9 +179,9 @@ TWI_ErrStatus TWI_MasterReadDataByte(uint8* Copy_puint8DataByte)
 {
 	TWI_ErrStatus LocalErrorStatus= NoError;
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*Wait for TWINT Flag set*/
-	while( (GETBIT(TWCR,TWCR_TWINT))  == 0);
+	while( (GET_BIT(TWCR,TWCR_TWINT))  == 0);
 	//*Copy_puint8DataByte=TWDR;
 	if( (TWSR & 0xF8) != MSTR_RD_BYTE_WITH_NACK)
 	{
@@ -197,20 +197,21 @@ TWI_ErrStatus TWI_MasterReadDataByte(uint8* Copy_puint8DataByte)
 void TWI_SendStopCondition(void)
 {
 	/*send stop condition*/
-	SETBIT(TWCR,TWCR_TWSTO);
+	SET_BIT(TWCR,TWCR_TWSTO);
 	/*Clear TWINT flag*/
-	SETBIT(TWCR,TWCR_TWINT);
+	SET_BIT(TWCR,TWCR_TWINT);
 	/*Enable TWI*/
-	SETBIT(TWCR,TWCR_TWEN);
+	SET_BIT(TWCR,TWCR_TWEN);
 }
 
 void DisableAck(void)
 {
 	/*Disable Acknowledge*/
-	CLEARBIT(TWCR,TWCR_TWEA);
+	CLEAR_BIT(TWCR,TWCR_TWEA);
 }
+
 void EnableAck(void)
 {
-	/*Enable Acknowledge*/
-	SETBIT(TWCR,TWCR_TWEA);
+
+	SET_BIT(TWCR,TWCR_TWEA);
 }
