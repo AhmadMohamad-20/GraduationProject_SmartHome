@@ -10,10 +10,11 @@
 #include "MCAL/DIO/DIO_Interface.h"
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
-
+#include "HAL/EEPROM/EEPROM_Interface.h"
+#include "main.h"
 uint8 m = 0;
 
-void loginToSystem(void);
+
 
 int main(void)
 {
@@ -32,22 +33,25 @@ int main(void)
 void loginToSystem(void)
 {
 	uint8 localButtonVal = 0;
-	char password[4] = {0};
+	uint8 selector = 0;
 	uint8 counter = 0;
+	char password[4] = {0};
+	char savedPassword[4] = {0};
+
 	LCD_clearDisplay_4bit(LCD_DATA_PORT);
 	LCD_sendString_4bit(LCD_DATA_PORT,"1 => ADMIN MODE");
 	LCD_setCursorAt_4bit(LCD_DATA_PORT,LCD_ROW2,1);
 	LCD_sendString_4bit(LCD_DATA_PORT,"2 => USER MODE");
-	localButtonVal = KEYPAD_getValue();
-	while (!(localButtonVal == '1' || localButtonVal == '2'))
+	selector = KEYPAD_getValue();
+	while (!(selector == '1' || selector == '2'))
 	{
-		localButtonVal = KEYPAD_getValue();
+		selector = KEYPAD_getValue();
 	}
 	LCD_clearDisplay_4bit(LCD_DATA_PORT);
 	LCD_setCursorAt_4bit(LCD_DATA_PORT,LCD_ROW1,4);
 	LCD_sendString_4bit(LCD_DATA_PORT," PASSWORD");
 	LCD_setCursorAt_4bit(LCD_DATA_PORT,LCD_ROW2,6);
-	LCD_sendCommand_4bit(LCD_DATA_PORT,0b00001101);
+	LCD_sendCommand_4bit(LCD_DATA_PORT,DISPLAY_CURSOR_BLINKING_ON);
 	for (;counter < 4; counter++)
 	{
 		localButtonVal = KEYPAD_getValue();
@@ -57,5 +61,13 @@ void loginToSystem(void)
 		}
 		password[counter] = localButtonVal;
 		LCD_sendData_4bit(LCD_DATA_PORT,'*');
+	}
+	if (selector == 1)
+	{
+		EEPROM_voidRead4Numbers(0X4545,savedPassword);
+	}
+	else if (selector == 2)
+	{
+
 	}
 }
