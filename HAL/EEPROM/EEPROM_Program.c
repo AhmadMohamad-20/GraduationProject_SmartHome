@@ -1,107 +1,80 @@
 /*
- * EEPROM_Program.c
- *
- *  Created on: Jan 23, 2024
- *      Author: hp
+ * Author   : Ahmed Mohamed Aboud
+ * Linkedin :https://www.linkedin.com/in/ahmed-mohamed-aboud-33b2471b1/
+ * File Name: EEPROM_Program.c
+ * Date: 12 Feb 2024
  */
+
 #include <util/delay.h>
-#include "STD.h"
-#include "BIT_MATH.h"
-#include "IIC_Interface.h"
-#include "EEPROM_Config.h"
-#include "EEPROM_Interface.h"
+#include "../../LIBRARIES/STD_Types.h"
+#include "../../LIBRARIES/bitmath.h"
+
+#include "../../MCAL/IIC/TWI_Interface.h"
+
 #include "EEPROM_Private.h"
-#include "IIC_Registers.h"
+#include "EEPROM_Interface.h"
 
-void EEPROM_voidSendDataByte(uint16 Copy_uint16LocationAddress, uint8 Copy_uint8DataByte)
+void EEPROM_init(void)
 {
-	uint8 Local_uint8AddressPacket;
+	TWI_initMasterWithoutAddress();
+}
 
-	Local_uint8AddressPacket = EEPROM_FIXED_ADDRESS | (A2_CONNECTION <<2) | (uint8)(Copy_uint16LocationAddress >>8);
-
-	/*2k EEPROM*/
-//  Local_uint8AddressPacket = EEPROM_FIXED_ADDRESS | A2_CONNECTION <<2 | A1_CONNECTION <<1 | A0_CONNECTION;
-
-	/*Send start condition*/
-	TWI_SendStartCondition();
-
-	/*Send the address packet*/
-	TWI_SendSlaveAddressWithWrite(Local_uint8AddressPacket);
-
-	/*Send the rest 8bits of the location address*/
-	TWI_MasterWriteDataByte((uint8)Copy_uint16LocationAddress);
-
-	/*Send the data byte to the memory location*/
-	TWI_MasterWriteDataByte(Copy_uint8DataByte);
-
-	/*Send stop condition*/
-	TWI_SendStopCondition();
-
-	/*Delay until the write cycle is finished*/
+void EEPROM_writeDataByte(uint16 copy_EEPROM_address, uint8 copy_EEPROM_data)
+{
+	uint8 local_address = EEPROM_FIXED_ADDRESS  | (A2_ADDRESS << 2) | (A1_ADDRESS << 1) | (A0_ADDRESS) | (copy_EEPROM_address >> 8);
+	TWI_sendStartCondition();
+	TWI_sendSlaveAddressAndStatWrite(local_address);
+	TWI_sendDataByteMaster((uint8)copy_EEPROM_address);
+	TWI_sendDataByteMaster(copy_EEPROM_data);
+	TWI_sendStopCondition();
 	_delay_ms(10);
 }
-
-uint8 EEPROM_uint8ReadDataByte(uint16 Copy_uint16LocationAddress)
+uint8 EEPROM_readDataByte(uint16 copy_EEPROM_address)
 {
-	uint8 Local_uint8AddressPacket, Local_uint8Data;
-
-	Local_uint8AddressPacket = EEPROM_FIXED_ADDRESS | (A2_CONNECTION <<2) | (uint8)(Copy_uint16LocationAddress >>8);
-
-	/*2k EEPROM*/
-//	Local_uint8AddressPacket = EEPROM_FIXED_ADDRESS | A2_CONNECTION <<2 | A1_CONNECTION <<1 | A0_CONNECTION;
-
-	/*Send start condition*/
-	TWI_SendStartCondition();
-
-	/*Send the address packet with write request*/
-	TWI_SendSlaveAddressWithWrite(Local_uint8AddressPacket);
-
-	/*Send the rest 8bits of the location address*/
-	TWI_MasterWriteDataByte((uint8)Copy_uint16LocationAddress);
-
-	/*Send repeated start to change write request into read request*/
-	TWI_SendRepeatedStart();
-
-	/*Send the address packet with read request*/
-	TWI_SendSlaveAddressWithRead(Local_uint8AddressPacket);
-
-	/*Get the data from memory*/
-	TWI_MasterReadDataByte(&Local_uint8Data);
-
-	/*send the stop condition*/
-	TWI_SendStopCondition();
-
-	return Local_uint8Data;
+	uint8 local_data = 0;
+	uint8 local_address = EEPROM_FIXED_ADDRESS  | (A2_ADDRESS << 2) | (A1_ADDRESS << 1) | (A0_ADDRESS) | (copy_EEPROM_address >> 8);
+	TWI_sendStartCondition();
+	TWI_sendSlaveAddressAndStatWrite(local_address);
+	TWI_sendDataByteMaster((uint8)copy_EEPROM_address);
+	TWI_recieveDataByteMaster(&local_data);
+	TWI_sendStopCondition();
+	return local_data;
 }
 
-void EEPROM_voidSend4Numbers(uint16 Copy_uint16LocationAddress, char* Array_Recieve_Str)
+void EEPROM_deleteByte(uint16 copy_EEPROM_address)
 {
-	int i=0;
-	for(i=0;i<4;i++)
+	EEPROM_writeDataByte(copy_EEPROM_address,0xFF);
+}
+
+void EEPROM_writeString(uint16 cop_EEPROM_address, char *copy_EEPROM_ptr)
+{
+	//uint8 counter = 0;
+	while (*copy_EEPROM_ptr != '\0')
 	{
-		EEPROM_voidSendDataByte(Copy_uint16LocationAddress,*Array_Recieve_Str);
-		Copy_uint16LocationAddress++;
-		Array_Recieve_Str += 1;
+		EEPROM_writeDataByte(cop_EEPROM_address,*copy_EEPROM_ptr);
+		cop_EEPROM_address++;
+		copy_EEPROM_ptr++;
+
 	}
 }
 
-void EEPROM_voidRead4Numbers(uint16 Copy_uint16LocationAddress, char* Array_Recieve_Str)
+void EEPROM_readString(uint16 copy_EEPROM_ADDRESS, char *copy_EEPROM_ptr)
 {
-	int i=0;
-	for(i=0;i<4;i++)
+	uint8 byteVal = 0;
+	if (copy_EEPROM_ptr != NULL)
 	{
-		Array_Recieve_Str[i] = EEPROM_uint8ReadDataByte(Copy_uint16LocationAddress);
-		Copy_uint16LocationAddress++;
+		byteVal = EEPROM_readDataByte(copy_EEPROM_ADDRESS);
+		while (byteVal == 0xFF)
+		{
+			*copy_EEPROM_ptr = byteVal;
+			copy_EEPROM_ptr++;
+			copy_EEPROM_ADDRESS++;
+			byteVal = EEPROM_readDataByte(copy_EEPROM_ADDRESS);
+		}
 	}
-}
-
-void EEPROM_voidSendString(uint16 Copy_uint16LocationAddress, char* str)
-{
-	while(*str!= '\0')
+	else
 	{
-		EEPROM_voidSendDataByte(Copy_uint16LocationAddress++,*str);
-		str +=1;
+
 	}
+
 }
-
-

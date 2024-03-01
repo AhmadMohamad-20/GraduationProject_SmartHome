@@ -1,17 +1,18 @@
 /*
- * EEPROM_Interface.h
- *
- *  Created on: Jan 23, 2024
- *      Author: Sherif
+ * Author   : Ahmed Mohamed Aboud
+ * Linkedin :https://www.linkedin.com/in/ahmed-mohamed-aboud-33b2471b1/
+ * File Name: EEPROM_Interface.h
+ * Date: 12 Feb 2024
  */
 
 #ifndef EEPROM_INTERFACE_H_
 #define EEPROM_INTERFACE_H_
 
-void EEPROM_voidSendDataByte(uint16 Copy_uint16LocationAddress, uint8 Copy_uint8DataByte);
-uint8 EEPROM_uint8ReadDataByte(uint16 Copy_uint16LocationAddress);
-void EEPROM_voidSend4Numbers(uint16 Copy_uint16LocationAddress, char* Array_Recieve_Str);
-void EEPROM_voidRead4Numbers(uint16 Copy_uint16LocationAddress, char* Array_Recieve_Str);
-void EEPROM_voidSendString(uint16 Copy_uint16LocationAddress, char* str);
+void EEPROM_init(void);
+void EEPROM_writeDataByte(uint16 copy_EEPROM_address, uint8 copy_EEPROM_data);
+void EEPROM_deleteByte(uint16 copy_EEPROM_address);
+uint8 EEPROM_readDataByte(uint16 copy_EEPROM_address);
+void EEPROM_writeString(uint16 cop_EEPROM_address, char *copy_EEPROM_ptr);
+void EEPROM_readString(uint16 copy_EEPROM_ADDRESS, char *copy_EEPROM_ptr);
 
 #endif /* EEPROM_INTERFACE_H_ */
