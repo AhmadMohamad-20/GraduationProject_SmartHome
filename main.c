@@ -33,12 +33,9 @@ static void checkUserPassword(void);
 
 int main(void)
 {
+	/* initialize System */
 	systemInit();
-	//EEPROM_clearMemory();
-	//EEPROM_writeString(ADMIN_PASSWORD,"ZOOBRY YA KOSOMAK");
-	//savedPassword[0] = EEPROM_uint8ReadDataByte(ADMIN_PASSWORD);
-	//EEPROM_voidRead4Numbers(ADMIN_PASSWORD, savedPassword, MAX_SIZE_PASSWORD);
-
+	
 	loginToSystem();
 
 	while(1)
@@ -87,6 +84,10 @@ static void adminLogIn(void)
 {
 	uint8 local_checkVal = 0;
 	EEPROM_voidRead4Numbers(ADMIN_PASSWORD,(uint8 *)savedPassword, MAX_SIZE_PASSWORD);
+	/* if there is no password for admin , it will :
+ 		- display "First time " for 1.5 sec 
+   		- Insert Paasword for the first time
+     		- Sign the admin using same password */
 	if (*savedPassword == '\0')
 	{
 		LCD_clearDisplay_4bit();
@@ -104,6 +105,10 @@ static void adminLogIn(void)
 			LCD_sendString_4bit("WELCOME ADMIN !!");
 		}
 	}
+	/* 
+ 	if there is  password for admin , it will :
+    		- Sign the admin password 
+      	*/
 	else
 	{
 		local_checkVal = checkPassword();
@@ -124,6 +129,8 @@ static void userLogIn(void)
 	uint8 localCheck = 0;
 	uint8 local_counter = 0;
 	uint8 local_buttonVal = 0;
+
+	/* Sign the user ID and Password */
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("ID : ");
 	LCD_setCursorAt_4bit(LCD_ROW1,6);
@@ -138,6 +145,9 @@ static void userLogIn(void)
 		ID[local_counter] = local_buttonVal;
 		LCD_sendData_4bit(local_buttonVal);
 	}
+	/* Check if the user ID is present or Not 
+  		NOTE : THE ID has 3 Numbers
+    	*/
 	localCheck = checkUserID();
 	if (localCheck == 0)
 	{
@@ -181,9 +191,10 @@ static uint8 checkPassword(void)
 	uint8 local_check = 0;
 
 	LCD_clearDisplay_4bit();
-	LCD_sendString_4bit("ENTER PASSWORD");
-	LCD_setCursorAt_4bit(LCD_ROW2,6);
+	LCD_sendString_4bit("PASSWORD : ");
+	LCD_setCursorAt_4bit(LCD_ROW1,8);
 	LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
+	/* read the saved password from the eeprom */
 	EEPROM_voidRead4Numbers(ADMIN_PASSWORD,(uint8 *)savedPassword,MAX_SIZE_PASSWORD);
 	for (; local_counter < MAX_NUM_PASSWORD; local_counter++)
 	{
@@ -195,12 +206,17 @@ static uint8 checkPassword(void)
 		password[local_counter] = local_buttonVal;
 		LCD_sendData_4bit('*');
 	}
+	/* compare the typed password with the stored password */
 	local_check = strncmp(password, savedPassword, MAX_SIZE_PASSWORD);
 	while ((local_check != 0) && (local_counterCheck))
 	{
+		/* DISPLAY INVALID PASSWORD AND ENTER PASSWORD AGAIN FOR 3 TIMES*/
 		LCD_clearDisplay_4bit();
-		LCD_sendString_4bit("ENTER PASSWORD");
-		LCD_setCursorAt_4bit(LCD_ROW2,6);
+		LCD_sendString_4bit("INVALID PASSWORD");
+		_delay_ms(1000);
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("PASSWORD : ");
+		LCD_setCursorAt_4bit(LCD_ROW1,8);
 		LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
 		for (local_counter = 0; local_counter < MAX_NUM_PASSWORD; local_counter++)
 		{
