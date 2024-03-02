@@ -21,9 +21,10 @@
 
 #define FUNCTION_SET_8BIT				0b00111000  /* 2 rows , 8-bit , 5*8 character size*/
 #define FUNCTION_SET_4BIT				0b00101000  /* 2 rows , 4-bit , 5*8 character size*/
-#define DISPLAY_CURSOR_BLINKING		0b00001100 	/*Display on , cursor off , blinking off*/
-#define DISPLAY_CLEAR				0x01
-#define ENTRY_MODE					0b00000110 	/*increasing cursor, no shifting*/
+#define DISPLAY_CURSOR_BLINKING			0b00001100 	/*Display on , cursor off , blinking off*/
+#define DISPLAY_CURSOR_BLINKING_ON		0b00001101 	/*Display on , cursor off , blinking on*/
+#define DISPLAY_CLEAR					0x01
+#define ENTRY_MODE						0b00000110 	/*increasing cursor, no shifting*/
 
 #define LCD_ROW1	1
 #define LCD_ROW2	2

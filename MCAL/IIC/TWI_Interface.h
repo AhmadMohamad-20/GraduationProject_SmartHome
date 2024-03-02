@@ -8,22 +8,38 @@
 #ifndef TWI_INTERFACE_H_
 #define TWI_INTERFACE_H_
 
-#define MASTER_READ		1
-#define MASTER_WRITE	0
+typedef enum {
+	NoError,
+	StartConditionErr,
+	RepeatedStartError,
+	SlaveAddressWithWriteErr,
+	SlaveAddressWithReadErr,
+	MasterWriteByteErr,
+	MasterReadByteErr,
+}TWI_ErrStatus;
+
+/*Set master address to 0 if master will not be addressed*/
+void TWI_InitMaster(uint8 Copy_uint8Address);
+
+void TWI_InitSlave(uint8 Copy_uint8Address);
+
+TWI_ErrStatus TWI_SendStartCondition(void);
+
+TWI_ErrStatus TWI_SendRepeatedStart(void);
+
+TWI_ErrStatus TWI_SendSlaveAddressWithWrite(uint8 Copy_uint8SlaveAddress);
+
+TWI_ErrStatus TWI_SendSlaveAddressWithRead(uint8 Copy_uint8SlaveAddress);
+
+TWI_ErrStatus TWI_MasterWriteDataByte(uint8 Copy_uint8DataByte);
+
+TWI_ErrStatus TWI_MasterReadDataByte(uint8* Copy_puint8DataByte);
+
+void TWI_SendStopCondition(void);
+
+void DisableAck(void);
+
+void EnableAck(void);
 
 
-void TWI_initMasterWithoutAddress(void);
-void TWI_initMasterWithAddress(uint8 copy_TWI_Address);
-void TWI_sendStartCondition(void);
-void TWI_sendRepeatedStartCondition(void);
-void TWI_sendStopCondition(void);
-uint8 TWI_sendSlaveAddressAndStatWrite(uint8 copy_TWI_slaveAddress);
-void TWI_sendSlaveAddressAndStatRead(uint8 copy_TWI_slaveAddress);
-void TWI_sendDataByteMaster(uint8 copy_TWI_dataByte);
-void TWI_recieveDataByteMaster(uint8 *copy_TWI_dataBytePtr);
-
-void TWI_initSlave(uint8 copy_TWI_slaveAddress);
-void TWI_sendDataByteSlave(uint8 copy_TWI_dataByte);
-void TWI_recieveDataByteSlave(uint8 *copy_TWI_dataBytePtr);
-uint8 TWI_checkIfCalled(void);
 #endif /* TWI_INTERFACE_H_ */

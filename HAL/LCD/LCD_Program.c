@@ -293,6 +293,7 @@ StdReturnType LCD_clearDisplay_4bit(void)
 {
 	StdReturnType local_errorSignal = OK_STAT;
 	local_errorSignal = LCD_sendCommand_4bit(DISPLAY_CLEAR);
+	local_errorSignal = LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING);
 	LCD_sendCommand_4bit(LCD_DDRAM_ROW1);
 
 	return local_errorSignal;

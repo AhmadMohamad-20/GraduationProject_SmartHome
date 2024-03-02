@@ -19,6 +19,11 @@
 #define MAX_NUM_ID    	 3
 #define MAX_NUM_PASSWORD 4
 
+#define MAX_SIZE_PASSWORD	4
+#define MAX_SIZE_ID			3
+
+#define INCORRECT_PASSWORD	1
+#define CORRECT_PASSWORD	2
 
 void systemInit(void);
 void loginToSystem(void);

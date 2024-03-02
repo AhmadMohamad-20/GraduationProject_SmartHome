@@ -8,30 +8,16 @@
 #ifndef TWI_PRIVATE_H_
 #define TWI_PRIVATE_H_
 
-#define TWINT	7
-#define TWEA	6
-#define TWSTA	5
-#define TWSTO	4
-#define TWWC	3
-#define TWEN	2
-#define TWIE	0
-
-#define TWPS1	1
-#define TWPS0	0
-
-#define STATUS_MODE 				(TWSR & 0xF8)
-/* Master Transimitter */
-#define START_CONDITION_STATUS		0x08	/* master start condition */
-#define REPEATED_CONDITION_STATUS	0x10	/* master repeated start condition */
-#define SLAVE_ADDRESS_WRITE_ACK		0x18	/* master send slave address + write => slave ack */
-#define SLAVE_ADDRESS_WRITE_NACK	0x20	/* master send slave address + write => slave not ack */
-#define MSTR_WR_BYTE_ACK         	0x28 	/* Master transmit data ACK */
-#define MSTR_WR_BYTE_NACK         	0x30 	/* Master transmit data Not ACK */
-
-/* Master Reciever */
-#define SLAVE_ADDRESS_READ_ACK		0x40	/* master send slave address + read => slave ack */
-#define SLAVE_ADDRESS_READ_NACK		0x48	/* master send slave address + read => slave not ack */
-#define MSTR_RD_BYTE_WITH_ACK   	0x50 	/* Master received data with ACK */
-#define MSTR_RD_BYTE_WITH_NACK   	0x58 	/* Master received data with not ACK */
+#define START_ACK                0x08 /* start has been sent */
+#define REP_START_ACK            0x10 /* repeated start */
+#define SLAVE_ADD_AND_WR_ACK     0x18 /* Master transmit ( slave address + Write request ) ACK */
+#define SLAVE_ADD_AND_RD_ACK     0x40 /* Master transmit ( slave address + Read request ) ACK */
+#define MSTR_WR_BYTE_ACK         0x28 /* Master transmit data ACK */
+#define MSTR_RD_BYTE_WITH_ACK    0x50 /* Master received data with ACK */
+#define MSTR_RD_BYTE_WITH_NACK   0x58 /* Master received data with not ACK */
+#define SLAVE_ADD_RCVD_WR_REQ    0x60 /* means that slave address is received with write request */
+#define SLAVE_DATA_RECEIVED      0x80 /* means that a byte is received */
+#define SLAVE_ADD_RCVD_RD_REQ    0xA8 /* means that slave address is received with read request */
+#define SLAVE_BYTE_TRANSMITTED   0xB8 /* means that the written byte is transmitted */
 
 #endif /* TWI_PRIVATE_H_ */
