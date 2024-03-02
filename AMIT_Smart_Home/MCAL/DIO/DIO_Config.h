@@ -1,0 +1,98 @@
+/*
+ * Author   : Ahmed Mohamed Aboud
+ * Linkedin :https://www.linkedin.com/in/ahmed-mohamed-aboud-33b2471b1/
+ * File Name: DIO_Config.h
+ * Date: 17 Feb 2024
+ */
+
+#ifndef MCAL_DIO_DIO_CONFIG_H_
+#define MCAL_DIO_DIO_CONFIG_H_
+
+
+
+
+
+	/*	DDR CONFIG	*/
+#define PIN_OUTPUT	1
+#define PIN_INPUT	0
+
+
+#define DDRA_PIN0	PIN_INPUT
+#define DDRA_PIN1	PIN_INPUT
+#define DDRA_PIN2	PIN_INPUT
+#define DDRA_PIN3	PIN_INPUT
+#define DDRA_PIN4	PIN_OUTPUT
+#define DDRA_PIN5	PIN_OUTPUT
+#define DDRA_PIN6	PIN_OUTPUT
+#define DDRA_PIN7	PIN_INPUT
+
+#define DDRB_PIN0	PIN_INPUT
+#define DDRB_PIN1	PIN_INPUT
+#define DDRB_PIN2	PIN_INPUT
+#define DDRB_PIN3	PIN_INPUT
+#define DDRB_PIN4	PIN_LOW
+#define DDRB_PIN5	PIN_LOW
+#define DDRB_PIN6	PIN_LOW
+#define DDRB_PIN7	PIN_LOW
+
+#define DDRC_PIN0	PIN_LOW
+#define DDRC_PIN1	PIN_LOW
+#define DDRC_PIN2	PIN_LOW
+#define DDRC_PIN3	PIN_LOW
+#define DDRC_PIN4	PIN_LOW
+#define DDRC_PIN5	PIN_LOW
+#define DDRC_PIN6	PIN_LOW
+#define DDRC_PIN7	PIN_LOW
+
+#define DDRD_PIN0	PIN_LOW
+#define DDRD_PIN1	PIN_LOW
+#define DDRD_PIN2	PIN_LOW
+#define DDRD_PIN3	PIN_OUTPUT
+#define DDRD_PIN4	PIN_OUTPUT
+#define DDRD_PIN5	PIN_OUTPUT
+#define DDRD_PIN6	PIN_LOW
+#define DDRD_PIN7	PIN_OUTPUT
+
+	/*	PORT CONFIG  */
+
+#define PIN_HIGH	1
+#define PIN_LOW		0
+
+#define PORTA_PIN0	PIN_HIGH
+#define PORTA_PIN1	PIN_HIGH
+#define PORTA_PIN2	PIN_HIGH
+#define PORTA_PIN3	PIN_HIGH
+#define PORTA_PIN4	PIN_LOW
+#define PORTA_PIN5	PIN_LOW
+#define PORTA_PIN6	PIN_LOW
+#define PORTA_PIN7	PIN_LOW
+
+#define PORTB_PIN0	PIN_HIGH
+#define PORTB_PIN1	PIN_HIGH
+#define PORTB_PIN2	PIN_HIGH
+#define PORTB_PIN3	PIN_HIGH
+#define PORTB_PIN4	PIN_LOW
+#define PORTB_PIN5	PIN_LOW
+#define PORTB_PIN6	PIN_LOW
+#define PORTB_PIN7	PIN_LOW
+
+#define PORTC_PIN0	PIN_LOW
+#define PORTC_PIN1	PIN_LOW
+#define PORTC_PIN2	PIN_LOW
+#define PORTC_PIN3	PIN_LOW
+#define PORTC_PIN4	PIN_LOW
+#define PORTC_PIN5	PIN_LOW
+#define PORTC_PIN6	PIN_LOW
+#define PORTC_PIN7	PIN_LOW
+
+#define PORTD_PIN0	PIN_LOW
+#define PORTD_PIN1	PIN_LOW
+#define PORTD_PIN2	PIN_LOW
+#define PORTD_PIN3	PIN_LOW
+#define PORTD_PIN4	PIN_LOW
+#define PORTD_PIN5	PIN_LOW
+#define PORTD_PIN6	PIN_LOW
+#define PORTD_PIN7	PIN_LOW
+
+
+#endif /* MCAL_DIO_DIO_CONFIG_H_ */
