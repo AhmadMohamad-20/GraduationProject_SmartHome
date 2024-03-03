@@ -14,15 +14,17 @@
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
 #include "HAL/EEPROM/EEPROM_Interface.h"
+#include "HAL/RTOS/RTOS_Interface.h"
 #include "main.h"
 
 uint8 ID[3] = {0};            // changed char to uint8
 uint8 savedID[3] = {0};
 uint8 password[4] = {0};
 uint8 savedPassword[4] = {0};
-
 static uint8 usersNum = 0;
+static uint8 selector = 0;
 
+static uint8 checkLatestUser(void);
 static void registerPassWord(void);
 static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location);
 static void adminLogIn(void);
@@ -30,6 +32,11 @@ static void userLogIn(void);
 //static uint8 passwordCompare(void);
 static uint8 checkUserID(void);
 //static void checkUserPassword(void);
+
+static void adminSetupMode(void);
+static void ac_control(void);
+static void door_control(void);
+static void led_control(void);
 
 int main(void)
 {
@@ -49,12 +56,17 @@ void systemInit(void)
 	KEYPAD_init();
 	LCD_init_4bit();
 	EEPROM_INIT();
+	RTOS_init();
+	//RTOS_addTask(1,50,0,adminSetupModeCheck);
+	RTOS_addTask(1,50,0,adminSetupModeCheck);
+	RTOS_addTask(2,50,0,ac_controlCheck);
+	RTOS_addTask(3,50,0,led_controlCheck);
+	RTOS_addTask(4,50,0,door_controlCheck);
+
 }
 
 void loginToSystem(void)
 {
-	static uint8 selector = 0;
-
 	/* Choose who will sign => User or Admin*/
 	LCD_clearDisplay_4bit();
 	LCD_sendStringAtAddress_4bit(LCD_ROW1,3,"WELCOME !!");
@@ -78,6 +90,32 @@ void loginToSystem(void)
 	default:
 		break;
 	}
+}
+
+void showOptions(void)
+{
+	switch (selector)
+	{
+	case ADMIN_SELECTED:
+		LCD_clearDisplay_4bit();
+		LCD_sendStringAtAddress_4bit(LCD_ROW1,3,"OPTIONS !!");
+		_delay_ms(1500);
+		break;
+	case USER_SELECTED:
+		break;
+	}
+
+}
+static uint8 checkLatestUser(void)
+{
+	uint8 local_latestUser = 0;
+
+	while (EEPROM_uint8ReadDataByte((USER1_ID + 0x10 * local_latestUser)) != 0xFF)
+	{
+		local_latestUser++;
+	}
+
+	return local_latestUser;
 }
 
 static void adminLogIn(void)
@@ -148,6 +186,7 @@ static void userLogIn(void)
 		ID[local_counter] = local_buttonVal;
 		LCD_sendData_4bit(local_buttonVal);
 	}
+	_delay_ms(100);
 
 	/* Check if the user ID is present or Not 
   		NOTE : THE ID has 3 Numbers
@@ -160,8 +199,9 @@ static void userLogIn(void)
 	}
 	else
 	{
-			uint16 User_Password= USER1_PASSWORD -10 + 10*localCheck;
-			checkPassword(User_Password);
+		localCheck--;
+		uint16 User_Password = USER1_PASSWORD + 0x10 * localCheck;
+		checkPassword(User_Password);
 	}
 }
 
@@ -185,6 +225,7 @@ static void registerPassWord(void)
 		password[local_counter] = local_buttonVal;
 		LCD_sendData_4bit('*');
 	}
+	_delay_ms(100);
 	EEPROM_voidSend4Numbers(ADMIN_PASSWORD,(uint8 *)password,MAX_SIZE_PASSWORD);
 }
 
@@ -197,7 +238,7 @@ static uint8 checkPassword (uint16 copy_u16EEPROM_PASS_Location)
 
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("PASSWORD : ");
-	LCD_setCursorAt_4bit(LCD_ROW1,8);
+	LCD_setCursorAt_4bit(LCD_ROW1,12);
 	LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
 	/* read the saved password from the eeprom */
 	EEPROM_voidRead4Numbers(copy_u16EEPROM_PASS_Location,(uint8 *)savedPassword,MAX_SIZE_PASSWORD);
@@ -211,6 +252,7 @@ static uint8 checkPassword (uint16 copy_u16EEPROM_PASS_Location)
 		password[local_counter] = local_buttonVal;
 		LCD_sendData_4bit('*');
 	}
+	_delay_ms(100);
 	/* compare the typed password with the stored password */
 	local_check = strncmp(password, savedPassword, MAX_SIZE_PASSWORD);
 	while ((local_check != 0) && (local_counterCheck))
@@ -221,7 +263,7 @@ static uint8 checkPassword (uint16 copy_u16EEPROM_PASS_Location)
 		_delay_ms(1000);
 		LCD_clearDisplay_4bit();
 		LCD_sendString_4bit("PASSWORD : ");
-		LCD_setCursorAt_4bit(LCD_ROW1,8);
+		LCD_setCursorAt_4bit(LCD_ROW1,12);
 		LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
 		for (local_counter = 0; local_counter < MAX_NUM_PASSWORD; local_counter++)
 		{
@@ -258,7 +300,7 @@ static uint8 checkUserID(void)
 		for (; local_counter < usersNum; local_counter++)
 		{
 			EEPROM_voidRead4Numbers((USER1_ID + (0x10 * local_counter)),savedID, MAX_SIZE_ID);
-			localCheck = strncmp(ID,savedID,MAX_SIZE_ID);
+			localCheck = strncmp((char *)ID,(char *)savedID,MAX_SIZE_ID);
 			if (localCheck != 0)
 			{
 				continue;
@@ -271,6 +313,7 @@ static uint8 checkUserID(void)
 		return 0;
 	}
 }
+
 /*
 static void checkUserPassword(void)
 {
@@ -292,59 +335,109 @@ void add_user(void)
 {
 
 	static uint8 usersCounter = 0;
-
+	usersCounter = checkLatestUser();
 	/* send by bluetooth to mobile app "Enter User ID"*/
 	/*Read from mobile and save it in ID Array*/
-	EEPROM_voidSend4Numbers( USER1_ID+10*usersCounter , ID , 4);
+	EEPROM_voidSend4Numbers( USER1_ID+ 0x10 * usersCounter , ID , MAX_SIZE_ID);
 	/* send by bluetooth to mobile app "Enter User ID"*/
 	/*Read from mobile and save it in password array*/
-	EEPROM_voidSend4Numbers( USER1_PASSWORD+10*usersCounter , password , 4);
+	EEPROM_voidSend4Numbers( USER1_PASSWORD+10*usersCounter , password , MAX_SIZE_PASSWORD);
 }
 
 
 void RemoveUser(uint8* copy_userID)
 {   /* this function deletes 8 consequent locations (ID + Password) in eeprom */
 	uint8 i=0;
-	uint8 local_temp_ID_Arr[4]={0}
-	for(i=0;i<MAX_NUM_ID;i++)
+	uint8 local_temp_ID_Arr[4]={0};
+
+	for(i=0;i<MAX_USER_NUM;i++)
 	{
 		EEPROM_voidRead4Numbers(USER1_ID+10*i ,local_temp_ID_Arr,4);
 		/*check if id exist?*/
-		if (strncmp(copy_userID, local_temp_ID_Arr, MAX_SIZE_PASSWORD)!=0 )
+		if (strncmp(copy_userID, local_temp_ID_Arr, MAX_SIZE_PASSWORD)!= 0 )
 		{
 			continue;
 		}
 		else
 		{
 			/*remove user id and password*/
-			EEPROM_voidRemoveUser(USER1_ID+10*i);
+			EEPROM_voidRemoveUser(USER1_ID + 0x10 * i);
 			break;
 		}
 	}
+	if (i == (MAX_USER_NUM - 1))
+	{
+		/*Send by uart "ID does not exist"*/
+	}
+	/*
 	uint8* localID=copy_userID;
-		if(localID[0]==EEPROM_uint8ReadDataByte(USER1_ID) &&\
-			localID[1]==EEPROM_uint8ReadDataByte(USER1_ID+1)&&\
-			localID[2]==EEPROM_uint8ReadDataByte(USER1_ID+2)&&\
+		if(localID[0]==EEPROM_uint8ReadDataByte(USER1_ID) &&
+			localID[1]==EEPROM_uint8ReadDataByte(USER1_ID+1)&&
+			localID[2]==EEPROM_uint8ReadDataByte(USER1_ID+2)&&
 			localID[3]==EEPROM_uint8ReadDataByte(USER1_ID+3))
 		{
 			EEPROM_voidRemoveUser(USER1_ID);
 		}
-		else if(localID[0]==EEPROM_uint8ReadDataByte(USER2_ID) &&\
-			localID[1]==EEPROM_uint8ReadDataByte(USER2_ID+1)&&\
-			localID[2]==EEPROM_uint8ReadDataByte(USER2_ID+2)&&\
+		else if(localID[0]==EEPROM_uint8ReadDataByte(USER2_ID) &&
+			localID[1]==EEPROM_uint8ReadDataByte(USER2_ID+1)&&
+			localID[2]==EEPROM_uint8ReadDataByte(USER2_ID+2)&&
 			localID[3]==EEPROM_uint8ReadDataByte(USER2_ID+3))
 		{
 			EEPROM_voidRemoveUser(USER2_ID);
 		}
-		else if(localID[0]==EEPROM_uint8ReadDataByte(USER3_ID) &&\
-				localID[1]==EEPROM_uint8ReadDataByte(USER3_ID+1)&&\
-				localID[2]==EEPROM_uint8ReadDataByte(USER3_ID+2)&&\
+		else if(localID[0]==EEPROM_uint8ReadDataByte(USER3_ID) &&
+				localID[1]==EEPROM_uint8ReadDataByte(USER3_ID+1)&&
+				localID[2]==EEPROM_uint8ReadDataByte(USER3_ID+2)&&
 				localID[3]==EEPROM_uint8ReadDataByte(USER3_ID+3))
 			{
 				EEPROM_voidRemoveUser(USER3_ID);
 			}
+	 */
+	/*
 		else
 		{
-			/*Send by uart "ID does not exist"*/
+			//Send by uart "ID does not exist"
 		}
+		*/
+
+}
+
+void adminSetupModeCheck(void)
+{
+	adminSetupMode();
+}
+
+void ac_controlCheck(void)
+{
+	ac_control();
+}
+
+void door_controlCheck(void)
+{
+	door_control();
+}
+
+void led_controlCheck(void)
+{
+	led_control();
+}
+
+static void adminSetupMode(void)
+{
+
+}
+
+static void ac_control(void)
+{
+
+}
+
+static void door_control(void)
+{
+
+}
+
+static void led_control(void)
+{
+
 }

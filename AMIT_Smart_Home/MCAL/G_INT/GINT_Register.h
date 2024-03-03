@@ -8,6 +8,6 @@
 #ifndef MCAL_G_INT_GINT_REGISTER_H_
 #define MCAL_G_INT_GINT_REGISTER_H_
 
-
+#define SREG	(*(volatile uint8 *)0x5F)
 
 #endif /* MCAL_G_INT_GINT_REGISTER_H_ */

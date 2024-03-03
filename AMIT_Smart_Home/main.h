@@ -16,6 +16,7 @@
 #define USER1_ID		0x30
 #define USER1_PASSWORD	0x34
 
+#define MAX_USER_NUM	10
 #define MAX_NUM_ID    	 3
 #define MAX_NUM_PASSWORD 4
 
@@ -29,5 +30,10 @@ void systemInit(void);
 void loginToSystem(void);
 void add_user(void);
 void RemoveUser(uint8* copy_userID);
+void showOptions(void);
 
+void adminSetupModeCheck(void);
+void ac_controlCheck(void);
+void door_controlCheck(void);
+void led_controlCheck(void);
 #endif /* MAIN_H_ */

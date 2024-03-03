@@ -17,6 +17,8 @@
 #include "TIMER_Private.h"
 #include "TIMER_Interface.h"
 
+static void (*Timer0_pvCompareMatchCallBackFun)(void) = NULL;
+
 /*		TIMER0 FUNCTIONS	*/
 
 StdReturnType TIMER0_initNormal(uint8 copy_TIMER0_cmpOutMode)
@@ -1524,4 +1526,27 @@ StdReturnType TIMER2_stopTimer(void)
 	TCCR2 |= T2_NO_CLK;
 
 	return local_errorSignal;
+}
+
+uint8 Timer0_uint8_CompareMatchSetCallBack(void (*copy_pv_CallBackFunc)(void))
+{
+	uint8 local_uint8_error = OK_STAT;
+	if(copy_pv_CallBackFunc != NULL)
+	{
+		Timer0_pvCompareMatchCallBackFun = copy_pv_CallBackFunc;
+	}
+	else
+	{
+		local_uint8_error = NOT_OK_STAT;
+	}
+	return local_uint8_error;
+}
+
+void __vector_10 (void) __attribute__((signal));
+void __vector_10 (void)
+{
+	if(Timer0_pvCompareMatchCallBackFun != NULL)
+	{
+		Timer0_pvCompareMatchCallBackFun();
+	}
 }

@@ -8,6 +8,6 @@
 #ifndef MCAL_G_INT_GINT_PRIVATE_H_
 #define MCAL_G_INT_GINT_PRIVATE_H_
 
-
+#define I_BIT	7
 
 #endif /* MCAL_G_INT_GINT_PRIVATE_H_ */

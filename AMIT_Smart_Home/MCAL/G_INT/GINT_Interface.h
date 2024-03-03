@@ -8,6 +8,7 @@
 #ifndef MCAL_G_INT_GINT_INTERFACE_H_
 #define MCAL_G_INT_GINT_INTERFACE_H_
 
-
+void GINT_enableGlobalInterrupt(void);
+void GINT_disableGlobalInterrupt(void);
 
 #endif /* MCAL_G_INT_GINT_INTERFACE_H_ */

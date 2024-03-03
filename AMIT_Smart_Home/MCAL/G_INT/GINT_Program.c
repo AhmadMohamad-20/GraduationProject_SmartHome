@@ -13,3 +13,12 @@
 #include "GINT_Private.h"
 #include "GINT_Interface.h"
 
+void GINT_enableGlobalInterrupt(void)
+{
+	SET_BIT(SREG,I_BIT);
+}
+
+void GINT_disableGlobalInterrupt(void)
+{
+	CLEAR_BIT(SREG,I_BIT);
+}
