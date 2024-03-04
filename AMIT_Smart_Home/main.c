@@ -13,6 +13,7 @@
 
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
+#include "HAL/BLUETOOTH_MODULE/BM_Interface.h"
 #include "HAL/EEPROM/EEPROM_Interface.h"
 #include "HAL/RTOS/RTOS_Interface.h"
 #include "main.h"
@@ -404,22 +405,87 @@ void RemoveUser(uint8* copy_userID)
 
 void adminSetupModeCheck(void)
 {
-	adminSetupMode();
+	uint8 local_choice = 0;
+	uint8 local_counter = 0;
+
+	local_choice = KEYPAD_getValue();
+	while ((local_choice != '1') && local_counter < MAX_TIME)
+	{
+		local_counter++;
+		local_choice = KEYPAD_getValue();
+	}
+	if (local_choice == '1')
+	{
+		adminSetupMode();
+	}
+	if (local_counter == MAX_TIME)
+	{
+		/* NOTHING */
+	}
 }
 
 void ac_controlCheck(void)
 {
-	ac_control();
+	uint8 local_choice = 0;
+	uint8 local_counter = 0;
+
+	local_choice = KEYPAD_getValue();
+	while ((local_choice != '2') && local_counter < MAX_TIME)
+	{
+		local_counter++;
+		local_choice = KEYPAD_getValue();
+	}
+	if (local_choice == '2')
+	{
+		ac_control();
+	}
+	if (local_counter == MAX_TIME)
+	{
+		/* NOTHING */
+	}
 }
 
 void door_controlCheck(void)
 {
-	door_control();
+	uint8 local_choice = 0;
+	uint8 local_counter = 0;
+
+	local_choice = KEYPAD_getValue();
+	while ((local_choice != '3') && local_counter < MAX_TIME)
+	{
+		local_counter++;
+		local_choice = KEYPAD_getValue();
+	}
+	if (local_choice == '3')
+	{
+		door_control();
+	}
+	if (local_counter == MAX_TIME)
+	{
+		/* NOTHING */
+	}
 }
 
 void led_controlCheck(void)
 {
-	led_control();
+	uint8 local_choice = 0;
+	uint8 local_counter = 0;
+
+	local_choice = KEYPAD_getValue();
+	while ((local_choice != '4') && local_counter < MAX_TIME)
+	{
+		local_counter++;
+		local_choice = KEYPAD_getValue();
+	}
+	if (local_choice == '4')
+	{
+		led_control();
+	}
+	if (local_counter == MAX_TIME)
+	{
+			/* NOTHING */
+	}
+
 }
 
 static void adminSetupMode(void)

@@ -1,18 +1,17 @@
 /*
- * UART_interface.h
+ * UART_Interface.h
  *
  *  Created on: 5 Jan 2024
- *      Author: Ziad Yakoot
+ *      Author: MR.X
  */
 
 #ifndef UART_INTERFACE_H_
 #define UART_INTERFACE_H_
 
-void UART_init(void);
-void UART_transmit(uint8 copy_data);
-uint8 UART_receive(void);
-void UART_transmit_string(char *string);
-void UART_receiveString(char *string);
-
-
+void UART_Init();
+void UART_Transmit(uint8 Copy_Data);
+uint8 UART_Receive(void);
+void UART_sendString(uint8 *copy_UART_ptr);
+void  UART_recieve_string(uint8 * ptr);
+uint8 compareString(uint8 arr1[10] , uint8 arr2[10]);
 #endif /* UART_INTERFACE_H_ */

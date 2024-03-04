@@ -26,6 +26,8 @@
 #define INCORRECT_PASSWORD	1
 #define CORRECT_PASSWORD	2
 
+#define MAX_TIME 50
+
 void systemInit(void);
 void loginToSystem(void);
 void add_user(void);

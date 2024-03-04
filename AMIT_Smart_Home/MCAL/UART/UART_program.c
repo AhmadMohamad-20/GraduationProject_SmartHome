@@ -1,74 +1,77 @@
 /*
- * UART_program.c
+ * UART_Program.c
  *
  *  Created on: 5 Jan 2024
- *      Author: Ziad Yakoot
+ *      Author: MR.X
  */
 #include "../../LIBRARIES/STD_Types.h"
 #include "../../LIBRARIES/bitmath.h"
-#include "UART_reg.h"
-#include "UART_priv.h"
-#include "UART_interface.h"
-#include "UART_cfg.h"
 
-void UART_init(void)
+#include "UART_Register.h"
+#include "UART_Config.h"
+#include "UART_Interface.h"
+
+void UART_Init()
 {
-	uint8 USCRC_val =0u;
-  SET_BIT(USCRB,USCRB_RXEN);
-  SET_BIT(USCRB,USCRB_TXEN);
+	 uint8 ucsrc=0u;
+	CLEAR_BIT(ucsrc,UMSEL);//SYNCRONAS
 
-  /*aSYNC*/
-  CLEAR_BIT(USCRC,USCRC_UMSEL);
+	CLEAR_BIT(ucsrc,UPM1); /*PARTIY DISABLED*/
+	CLEAR_BIT(ucsrc,UPM0);
 
+	SET_BIT(ucsrc,UCSZ0);/*8 BIT MODE*/
+	SET_BIT(ucsrc,UCSZ1);
+	CLEAR_BIT(UCSRB,UCSZ2);
 
-  /*character size mode*/
-  CLEAR_BIT(USCRB,USCRB_UCSZ2);
-  SET_BIT(USCRC,USCRC_UCSZ1);
-  SET_BIT(USCRC,USCRC_UCSZ0);
+	SET_BIT(UCSRB,TXEN);/* TRANSMIT ENABLE*/
+	SET_BIT(UCSRB,RXEN); /*RECIVE ENABLE*/
 
+	SET_BIT(ucsrc,URSEL);
 
+	UCSRC = ucsrc;
 
-  /*parity disable*/
-
-  CLEAR_BIT(USCRC,USCRC_UPM0);
-  CLEAR_BIT(USCRC,USCRC_UPM1);
-
-
-  /*Stop bit mode 1 bit*/
-  CLEAR_BIT(USCRC,USCRC_USBS);
-
-
-  /*register select */
-SET_BIT(USCRC,USCRC_URSEL);
-USCRC= USCRC_val;
-/*NORMAL SPEED MODE*/
-CLEAR_BIT(USCRA,USCRA_U2X);
-/*BAUD RATE 9600*/
-UBRRL =103U;
+	UBRRL=103;
 }
-void UART_transmit(uint8 copy_data)
+
+void UART_Transmit(uint8 Copy_Data)
 {
-	while((GET_BIT(USCRA,USCRA_UDRE)) == 0);
-	UDR = copy_data;
+
+	while((GET_BIT(UCSRA,UDRE)) == 0);
+
+	UDR = Copy_Data;
 }
-uint8 UART_receive(void)
+uint8 UART_Receive(void)
 {
-	while(GET_BIT(USCRA,USCRA_RXC)==0);
+
+	while((GET_BIT(UCSRA,RXC)) == 0);
+
 	return UDR;
 }
 
-void UART_transmit_string(char *string)
+void UART_sendString(uint8 *copy_UART_ptr)
 {
-	for(;*string != '\0'; string++)
+	if (copy_UART_ptr != NULL)
 	{
-		UART_transmit(*string);
+		while (copy_UART_ptr)
+		{
+			UART_Transmit(*copy_UART_ptr);
+			copy_UART_ptr++;
+		}
+	}
+	else
+	{
+		/* NOTHING */
 	}
 }
-void UART_receiveString(char *string)
-{
-	do
-	{
-		UART_receive();
-	}while(*string != '\0');
 
+void  UART_recieve_string(uint8 * ptr)
+{
+	uint8 i=0;
+	ptr[i]=UART_Receive();
+	while(ptr[i] != '\0') //0x20 ascii for space to indicate end of transmission
+	{
+		i++;
+		ptr[i]=UART_Receive();
+
+	}
 }
