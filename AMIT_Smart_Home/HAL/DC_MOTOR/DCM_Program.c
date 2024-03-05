@@ -14,16 +14,17 @@
 #include "DCM_Private.h"
 #include "DCM_Interface.h"
 
-StdReturnType DCM_turnOn(uint8 copy_DCM_port, uint8 copy_DCM_pin)
+
+StdReturnType DCM_turnOn(void)
 {
 	StdReturnType local_errorSignal = OK_STAT;
-	local_errorSignal = DIO_setPinValue(copy_DCM_port,copy_DCM_pin,HIGH);
+	local_errorSignal = DIO_setPinValue(DC_MOTOR_PORT,DC_MOTOR_PIN,HIGH);
 	return local_errorSignal;
 }
 
-StdReturnType DCM_turnOff(uint8 copy_DCM_port, uint8 copy_DCM_pin)
+StdReturnType DCM_turnOff(void)
 {
 	StdReturnType local_errorSignal = OK_STAT;
-	local_errorSignal = DIO_setPinValue(copy_DCM_port,copy_DCM_pin,LOW);
+	local_errorSignal = DIO_setPinValue(DC_MOTOR_PORT,DC_MOTOR_PIN,LOW);
 	return local_errorSignal;
 }

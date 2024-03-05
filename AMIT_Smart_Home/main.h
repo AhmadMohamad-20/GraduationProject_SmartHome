@@ -28,6 +28,12 @@
 
 #define MAX_TIME 50
 
+#define MAX_TEMP 	37
+#define MIN_TEMP	22
+
+#define DOOR_CLOSED		0x31
+#define DOOR_OPEN		0x32
+
 void systemInit(void);
 void loginToSystem(void);
 void add_user(void);

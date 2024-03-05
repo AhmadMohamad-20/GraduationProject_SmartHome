@@ -8,6 +8,7 @@
 #ifndef HAL_DC_MOTOR_DCM_CONFIG_H_
 #define HAL_DC_MOTOR_DCM_CONFIG_H_
 
-
+#define DC_MOTOR_PORT	DIO_PORTA
+#define DC_MOTOR_PIN	PIN1
 
 #endif /* HAL_DC_MOTOR_DCM_CONFIG_H_ */

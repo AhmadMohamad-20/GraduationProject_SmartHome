@@ -234,6 +234,16 @@ StdReturnType TIMER0_stopTimer(void)
 	return local_errorSignal;
 }
 
+StdReturnType TIMER0_initInterruptOutputCompare(void)
+{
+	SET_BIT(TIMSK,TIMSK_OCIE0);
+}
+
+StdReturnType TIMER0_initInterruptOverflow(void)
+{
+	SET_BIT(TIMSK,TIMSK_TOIE0);
+}
+
 
 /*		TIMER1 FUNCTIONS	*/
 

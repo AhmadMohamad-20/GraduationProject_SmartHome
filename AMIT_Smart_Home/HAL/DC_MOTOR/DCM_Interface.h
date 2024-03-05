@@ -8,7 +8,7 @@
 #ifndef HAL_DC_MOTOR_DCM_INTERFACE_H_
 #define HAL_DC_MOTOR_DCM_INTERFACE_H_
 
-StdReturnType DCM_turnOn(uint8 copy_DCM_port, uint8 copy_DCM_pin);
-StdReturnType DCM_turnOff(uint8 copy_DCM_port, uint8 copy_DCM_pin);
+StdReturnType DCM_turnOn(void);
+StdReturnType DCM_turnOff(void);
 
 #endif /* HAL_DC_MOTOR_DCM_INTERFACE_H_ */

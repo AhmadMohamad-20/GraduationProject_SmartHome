@@ -60,6 +60,8 @@ StdReturnType TIMER0_initPCPWM(uint8 copy_TIMER0_cmp, uint8 copy_TIMER0_cmpOutMo
 StdReturnType TIMER0_readValue(uint8 *copy_TIMER0_ptr);
 StdReturnType TIMER0_startTimer(uint8 copy_TIMER0_preScaling);
 StdReturnType TIMER0_stopTimer(void);
+StdReturnType TIMER0_initInterruptOutputCompare(void);
+StdReturnType TIMER0_initInterruptOverflow(void);
 
 StdReturnType TIMER1_initNormal(uint8 copy_TIMER1_cmpOutModeA, uint8 copy_TIMER1_cmpOutModeB);
 StdReturnType TIMER1_initCTC_OCR1A(uint8 copy_TIMER1_cmpOutModeA, uint16 copy_TIMER1_topLimit);

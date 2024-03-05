@@ -23,16 +23,19 @@ void RTOS_init(void)
 	Timer0_uint8_CompareMatchSetCallBack(&Schedular);
 	GINT_enableGlobalInterrupt();
 	TIMER0_initCTC(125,T0_OC_DISCONNECTED);
+	TIMER0_initInterruptOutputCompare();
 }
 
-void RTOS_start(uint8 prescalar)
+void RTOS_start(void)
 {
-	TIMER0_startTimer(prescalar);
+	TIMER0_startTimer(0x03);
 }
 
 void RTOS_addTask(uint8 copy_uint8_priority, uint16 copy_uint16_periodicity, uint16 copy_uint8_firstDelay, void (*pvTaskFunc)(void))
 {
 	uint8 local_uint8_errorStatus = PRIORITY_FREE;
+
+	copy_uint8_priority--;
 
 	if (systemTasks[copy_uint8_priority].taskFunc == NULL)
 	{

@@ -14,6 +14,11 @@
 #include "LED_Private.h"
 #include "LED_Interface.h"
 
+StdReturnType LED_init(uint8 copy_LED_port, uint8 cop_LED_pin)
+{
+	DIO_setPinDirection(copy_LED_port,cop_LED_pin,OUTPUT);
+}
+
 StdReturnType LED_turnOn(uint8 copy_LED_port, uint8 copy_LED_pin)
 {
 	StdReturnType local_errorState = OK_STAT;
