@@ -13,8 +13,8 @@
 
 void UART_Init()
 {
-	 uint8 ucsrc=0u;
-	CLEAR_BIT(ucsrc,UMSEL);//SYNCRONAS
+	uint8 ucsrc=0u;
+	CLEAR_BIT(ucsrc,UMSEL);//ASYNCRONAS
 
 	CLEAR_BIT(ucsrc,UPM1); /*PARTIY DISABLED*/
 	CLEAR_BIT(ucsrc,UPM0);
@@ -52,7 +52,7 @@ void UART_sendString(uint8 *copy_UART_ptr)
 {
 	if (copy_UART_ptr != NULL)
 	{
-		while (copy_UART_ptr)
+		while (*copy_UART_ptr != '\0')
 		{
 			UART_Transmit(*copy_UART_ptr);
 			copy_UART_ptr++;
@@ -60,18 +60,26 @@ void UART_sendString(uint8 *copy_UART_ptr)
 	}
 	else
 	{
-		/* NOTHING */
+		/* Do Nothing */
 	}
 }
 
-void  UART_recieve_string(uint8 * ptr)
+void  UART_recieve_string(uint8 * copy_UART_ptr)
 {
 	uint8 i=0;
-	ptr[i]=UART_Receive();
-	while(ptr[i] != '\0') //0x20 ascii for space to indicate end of transmission
+	uint8* local_ptr=copy_UART_ptr;
+	if(local_ptr != NULL)
 	{
-		i++;
-		ptr[i]=UART_Receive();
-
+		local_ptr[i]=UART_Receive();
+		while(local_ptr[i] != 0x0D) // Enter key =0x0D in Ascii
+		{
+			i++;
+			local_ptr[i]=UART_Receive();
+		}
 	}
+	else
+	{
+		/* Do Nothing*/
+	}
+
 }

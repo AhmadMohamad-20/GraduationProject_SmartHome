@@ -14,6 +14,7 @@
 #include "HAL/LED/LED_Interface.h"
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
+#include "HAL/DC_MOTOR/DCM_Interface.h"
 #include "HAL/BLUETOOTH_MODULE/BM_Interface.h"
 #include "HAL/EEPROM/EEPROM_Interface.h"
 #include "HAL/TEMPERATURE_SENSOR/TS_Interface.h"
