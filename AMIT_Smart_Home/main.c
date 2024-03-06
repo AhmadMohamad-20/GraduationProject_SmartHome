@@ -14,12 +14,13 @@
 #include "HAL/LED/LED_Interface.h"
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
-#include "HAL/DC_MOTOR/DCM_Interface.h"
 #include "HAL/BLUETOOTH_MODULE/BM_Interface.h"
 #include "HAL/EEPROM/EEPROM_Interface.h"
 #include "HAL/TEMPERATURE_SENSOR/TS_Interface.h"
 #include "HAL/RTOS/RTOS_Interface.h"
 #include "HAL/ServoMotor/SM_Interface.h"
+#include "HAL/DC_MOTOR/DCM_Interface.h"
+#include "HAL/DIMMER/DIM_Interface.h"
 #include "main.h"
 
 uint8 ID[3] = {0};            // changed char to uint8
@@ -48,12 +49,12 @@ int main(void)
 	/* initialize System */
 	systemInit();
 	
-	//loginToSystem();
-	//showOptions();
+	loginToSystem();
+	showOptions();
 	RTOS_start();
-	SM_rotateAngle(50);
-	_delay_ms(1550);
-	SM_rotateAngle(70);
+	//SM_rotateAngle(50);
+	//_delay_ms(1550);
+	//SM_rotateAngle(70);
 	while(1)
 	{
 
@@ -67,10 +68,10 @@ void systemInit(void)
 	EEPROM_INIT();
 	RTOS_init();
 	//RTOS_addTask(1,50,0,adminSetupModeCheck);
-	RTOS_addTask(1,50,0,adminSetupModeCheck);
-	RTOS_addTask(2,50,0,ac_controlCheck);
-	RTOS_addTask(3,50,0,led_controlCheck);
-	RTOS_addTask(4,50,0,door_controlCheck);
+	RTOS_addTask(1,1,0,adminSetupModeCheck);
+	RTOS_addTask(2,1,0,ac_control);
+	RTOS_addTask(3,1,0,led_controlCheck);
+	RTOS_addTask(4,1,0,door_controlCheck);
 	TS_init();
 	LED_init(LED1_PORT,LED1_PIN);
 	LED_init(LED2_PORT,LED2_PIN);
@@ -119,7 +120,8 @@ void showOptions(void)
 		LCD_sendString_4bit("1=>SETUP");
 		LCD_sendStringAtAddress_4bit(1,11,"2=>LED");
 		LCD_sendStringAtAddress_4bit(2,1,"3=>DOOR");
-		LCD_sendStringAtAddress_4bit(2,11,"4=>AC");
+
+
 		break;
 	case USER_SELECTED:
 		RTOS_suspendTask(1);
@@ -128,7 +130,7 @@ void showOptions(void)
 		LCD_sendStringAtAddress_4bit(LCD_ROW1,3,"OPTIONS !!");
 		_delay_ms(1500);
 		LCD_sendStringAtAddress_4bit(1,1,"1=>LED");
-		LCD_sendStringAtAddress_4bit(2,1,"2=>AC");
+
 		break;
 	}
 
@@ -171,6 +173,7 @@ static void adminLogIn(void)
 		{
 			LCD_clearDisplay_4bit();
 			LCD_sendString_4bit("WELCOME ADMIN !!");
+			_delay_ms(1500);
 		}
 	}
 	/* 
@@ -188,6 +191,7 @@ static void adminLogIn(void)
 		{
 			LCD_clearDisplay_4bit();
 			LCD_sendString_4bit("WELCOME ADMIN !!");
+			_delay_ms(1500);
 		}
 	}
 }
@@ -197,7 +201,7 @@ static void userLogIn(void)
 	uint8 localCheck = 0;
 	uint8 local_counter = 0;
 	uint8 local_buttonVal = 0;
-
+	uint8 checkk = 0;
 	/* Sign the user ID and Password */
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("ID : ");
@@ -229,7 +233,20 @@ static void userLogIn(void)
 	{
 		localCheck--;
 		uint16 User_Password = USER1_PASSWORD + 0x10 * localCheck;
-		checkPassword(User_Password);
+		checkk = checkPassword(User_Password);
+		if (checkk == CORRECT_PASSWORD)
+		{
+			LCD_clearDisplay_4bit();
+			LCD_sendString_4bit("WELCOME USER !!");
+			_delay_ms(1500);
+		}
+		else
+		{
+			LCD_clearDisplay_4bit();
+			LCD_sendString_4bit("WELCOME USER !!");
+			_delay_ms(1500);
+		}
+
 	}
 }
 
@@ -435,20 +452,20 @@ void adminSetupModeCheck(void)
 	uint8 local_choice = 0;
 	uint8 local_counter = 0;
 
-	local_choice = KEYPAD_getValue();
-	while ((local_choice != '1') && local_counter < MAX_TIME)
-	{
-		local_counter++;
 		local_choice = KEYPAD_getValue();
-	}
-	if (local_choice == '1')
-	{
-		adminSetupMode();
-	}
-	if (local_counter == MAX_TIME)
-	{
-		/* NOTHING */
-	}
+		while ((local_counter < MAX_TIME) && (local_choice != '1'))
+		{
+			local_counter++;
+			local_choice = KEYPAD_getValue();
+		}
+		if (local_choice == '1')
+		{
+			adminSetupMode();
+		}
+		else
+		{
+			/* NOTHING */
+		}
 }
 
 void ac_controlCheck(void)
@@ -456,17 +473,19 @@ void ac_controlCheck(void)
 	uint8 local_choice = 0;
 	uint8 local_counter = 0;
 
+
 	local_choice = KEYPAD_getValue();
-	while ((local_choice != '2') && local_counter < MAX_TIME)
+	while ((local_counter < MAX_TIME) && (local_choice != '2'))
 	{
 		local_counter++;
 		local_choice = KEYPAD_getValue();
 	}
+
 	if (local_choice == '2')
 	{
 		ac_control();
 	}
-	if (local_counter == MAX_TIME)
+	else
 	{
 		/* NOTHING */
 	}
@@ -475,55 +494,71 @@ void ac_controlCheck(void)
 void door_controlCheck(void)
 {
 	uint8 local_choice = 0;
-	uint8 local_counter = 0;
+		uint8 local_counter = 0;
 
-	local_choice = KEYPAD_getValue();
-	while ((local_choice != '3') && local_counter < MAX_TIME)
-	{
-		local_counter++;
 		local_choice = KEYPAD_getValue();
-	}
-	if (local_choice == '3')
-	{
-		door_control();
-	}
-	if (local_counter == MAX_TIME)
-	{
-		/* NOTHING */
-	}
+		while (((local_counter < MAX_TIME) && (local_choice != '3')))
+		{
+			local_counter++;
+			local_choice = KEYPAD_getValue();
+		}
+
+		if (local_choice == '3')
+		{
+			door_control();
+		}
+		else
+		{
+			/* NOTHING */
+		}
 }
 
 void led_controlCheck(void)
 {
 	uint8 local_choice = 0;
-	uint8 local_counter = 0;
+		uint8 local_counter = 0;
 
-	local_choice = KEYPAD_getValue();
-	while ((local_choice != '4') && local_counter < MAX_TIME)
-	{
-		local_counter++;
 		local_choice = KEYPAD_getValue();
-	}
-	if (local_choice == '4')
-	{
-		led_control();
-	}
-	if (local_counter == MAX_TIME)
-	{
-			/* NOTHING */
-	}
+		while ((local_counter < MAX_TIME) && (local_choice != '4'))
+		{
+			local_counter++;
+			local_choice = KEYPAD_getValue();
+		}
 
+		if (local_choice == '4')
+		{
+			led_control();
+		}
+		else
+		{
+			/* NOTHING */
+		}
 }
 
 static void adminSetupMode(void)
 {
+	uint8 userSetting = 0;
 	LCD_clearDisplay_4bit();
+	LCD_sendString_4bit("1 => ADD USER");
+	LCD_sendStringAtAddress_4bit("2 => REMOVE USER");
+
+	/* UART RECIEVE*/
+	if (userSetting == '1')
+	{
+		add_user();
+	}
+	else if (userSetting == '2')
+	{
+		RemoveUser();
+	}
+	showOptions();
+	RTOS_start();
 }
 
 static void ac_control(void)
 {
 	uint8 AC_Temp = 0;
-	LCD_clearDisplay_4bit();
+	//LCD_clearDisplay_4bit();
 	AC_Temp = TS_sendData();
 	if (AC_Temp >= MAX_TEMP)
 	{
@@ -533,6 +568,8 @@ static void ac_control(void)
 	{
 		DCM_turnOff();
 	}
+	showOptions();
+	RTOS_start();
 }
 
 static void door_control(void)
@@ -555,19 +592,22 @@ static void door_control(void)
 	{
 		LCD_clearDisplay_4bit();
 		LCD_sendString_4bit("DOOR OPEN");
-		SM_rotateAngle(180);
+		SM_rotateAngle(90);
 	}
 	else if (localDoorController == DOOR_CLOSED)
 	{
 		LCD_clearDisplay_4bit();
-		LCD_sendString_4bit("DOOR CLOSE");
+		LCD_sendString_4bit("   DOOR CLOSE");
 		SM_rotateAngle(0);
 	}
+	showOptions();
+	RTOS_start();
 }
 
 static void led_control(void)
 {
 	uint8 ledNumber = 0;
+	uint8 brightnessLevel = 0;
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("SELECT THE LED : ");
 	ledNumber = KEYPAD_getValue();
@@ -593,7 +633,17 @@ static void led_control(void)
 		LED_toggle(LED5_PORT,LED5_PIN);
 		break;
 	case '6':
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("CHOOSE BRIGHT LEVEL");
+		LCD_sendStringAtAddress_4bit(LCD_ROW2,1,"(0 - 9)");
+		brightnessLevel = KEYPAD_getValue();
+		while (!((brightnessLevel >= '0') && (brightnessLevel <= '9')))
+		{
+			brightnessLevel = KEYPAD_getValue();
+		}
+		DIMMER_start((brightnessLevel - 0x30));
 		break;
 	}
-
+	showOptions();
+	RTOS_start();
 }

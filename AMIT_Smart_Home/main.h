@@ -26,7 +26,7 @@
 #define INCORRECT_PASSWORD	1
 #define CORRECT_PASSWORD	2
 
-#define MAX_TIME 50
+#define MAX_TIME 5
 
 #define MAX_TEMP 	37
 #define MIN_TEMP	22
@@ -41,7 +41,7 @@ void RemoveUser(uint8* copy_userID);
 void showOptions(void);
 
 void adminSetupModeCheck(void);
-void ac_controlCheck(void);
+//void ac_controlCheck(void);
 void door_controlCheck(void);
 void led_controlCheck(void);
 #endif /* MAIN_H_ */
