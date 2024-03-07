@@ -22,7 +22,7 @@
 #include "MCAL/UART/UART_interface.h"
 #include "main.h"
 
-uint8 ID[3] = {0};            
+uint8 ID[3] = {0};
 uint8 savedID[3] = {0};
 uint8 password[4] = {0};
 uint8 savedPassword[4] = {0};
@@ -31,6 +31,7 @@ static uint8 selector = 0;
 
 static uint8 checkLatestUser(void);
 static void registerPassWord(void);
+static void registerAdminPassWord(void);
 static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location);
 void loginToSystem (void);
 static void adminLogIn(void);
@@ -147,8 +148,10 @@ static uint8 checkLatestUser(void)
 
 static void adminLogIn(void)
 {
+
 	uint8 local_checkVal = 0;
 	EEPROM_voidRead4Numbers(ADMIN_PASSWORD, savedPassword, MAX_SIZE_PASSWORD);
+
 	/* if there is no password for admin , it will :
  		- display "First time " for 1.5 sec 
    		- Insert Password for the first time
@@ -160,7 +163,7 @@ static void adminLogIn(void)
 		LCD_clearDisplay_4bit();
 		LCD_sendStringAtAddress_4bit(LCD_ROW1,2,"FIRST TIME !");
 		_delay_ms(1500);
-		registerPassWord();
+		registerAdminPassWord();
 		local_checkVal = checkPassword(ADMIN_PASSWORD);
 		if (local_checkVal == INCORRECT_PASSWORD)
 		{
@@ -173,10 +176,12 @@ static void adminLogIn(void)
 			_delay_ms(1500);
 		}
 	}
+
 	/* 
  	if there is  password for admin , it will :
-    		- Sign the admin password 
-      */
+    	- Sign the admin password
+    */
+
 	else
 	{
 		local_checkVal = checkPassword(ADMIN_PASSWORD);
@@ -240,7 +245,7 @@ static void userLogIn(void)
 		else
 		{
 			LCD_clearDisplay_4bit();
-			LCD_sendString_4bit("WELCOME USER !!");
+			LCD_sendString_4bit("Wrong Password !!");
 			_delay_ms(1500);
 		}
 
@@ -269,6 +274,19 @@ static void registerPassWord(void)
 	}
 	_delay_ms(100);
 	EEPROM_voidSend4Numbers(ADMIN_PASSWORD,(uint8 *)password,MAX_SIZE_PASSWORD);
+}
+static void registerAdminPassWord(void)
+{
+	uint8 local_counter = 0;
+	uint8 local_buttonVal = 0;
+
+	LCD_clearDisplay_4bit();
+	LCD_sendString_4bit("ENTER A PASSWORD");
+	UART_sendString("ENTER A PASSWORD");
+	UART_recieve_string(password);
+	EEPROM_voidSend4Numbers(ADMIN_PASSWORD,password,MAX_SIZE_PASSWORD);
+	LCD_setCursorAt_4bit(LCD_ROW2,6);
+	LCD_sendString_4bit("****");
 }
 
 static uint8 checkPassword (uint16 copy_u16EEPROM_PASS_Location)
@@ -358,7 +376,6 @@ static uint8 checkUserID(void)
 
 void add_user(void)
 {
-
 	static uint8 usersCounter = 0;
 	usersCounter = checkLatestUser();
 	/* send by bluetooth to mobile app "Enter User ID" and display it on lcd*/
@@ -553,10 +570,10 @@ static void door_control(void)
 	LCD_sendStringAtAddress_4bit(1,1,"1 => CLOSE DOOR");
 	LCD_sendStringAtAddress_4bit(2,1,"2 => OPEN DOOR");
 
-	localDoorController = KEYPAD_getValue();
+	localDoorController = UART_Receive();
 	while (!((localDoorController == '1') || (localDoorController == '2')))
 	{
-		localDoorController = KEYPAD_getValue();
+		localDoorController = UART_Receive();
 	}
 	if (localDoorController == DOOR_OPEN)
 	{
