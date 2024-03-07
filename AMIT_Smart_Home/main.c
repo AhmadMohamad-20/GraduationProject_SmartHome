@@ -42,6 +42,7 @@ static void adminSetupMode(void);
 static void ac_control(void);
 static void door_control(void);
 static void led_control(void);
+static void led_control_UART(void);
 
 int main(void)
 {
@@ -627,6 +628,52 @@ static void led_control(void)
 		while (!((brightnessLevel >= '0') && (brightnessLevel <= '9')))
 		{
 			brightnessLevel = KEYPAD_getValue();
+		}
+		DIMMER_start((brightnessLevel - 0x30));
+		break;
+	}
+	showOptions();
+	RTOS_start();
+}
+
+static void led_control_UART(void)
+{
+	uint8 ledNumber = 0;
+	uint8 brightnessLevel = 0;
+	LCD_clearDisplay_4bit();
+	LCD_sendString_4bit("SELECT THE LED : ");
+	UART_sendString("SELECT THE LED : ");
+	ledNumber = UART_Receive();
+	while (!((ledNumber <= '1') && (ledNumber >= '6')))
+	{
+		ledNumber = UART_Receive();
+	}
+	switch (ledNumber)
+	{
+	case '1':
+		LED_toggle(LED1_PORT,LED1_PIN);
+		break;
+	case '2':
+		LED_toggle(LED2_PORT,LED2_PIN);
+		break;
+	case '3':
+		LED_toggle(LED3_PORT,LED3_PIN);
+		break;
+	case '4':
+		LED_toggle(LED4_PORT,LED4_PIN);
+		break;
+	case '5':
+		LED_toggle(LED5_PORT,LED5_PIN);
+		break;
+	case '6':
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("CHOOSE BRIGHT LEVEL");
+		LCD_sendStringAtAddress_4bit(LCD_ROW2,1,"(0 - 9)");
+		UART_sendString("CHOOSE BRIGHT LEVEL from 0-9 ");
+		brightnessLevel = UART_Receive();
+		while (!((brightnessLevel >= '0') && (brightnessLevel <= '9')))
+		{
+			brightnessLevel = UART_Receive();
 		}
 		DIMMER_start((brightnessLevel - 0x30));
 		break;
