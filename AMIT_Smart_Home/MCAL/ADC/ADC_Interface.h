@@ -45,5 +45,4 @@ uint8 ADC_startConversionSync(uint8 copy_ADC_channels, uint8 *copy_ADC_data);
 void ADC_startConversionAsync(uint8 copy_ADC_channels);
 uint8 ADC_startChainConversionSync(ADC_chainSync_t *chainSync);
 void ADC_startChainConversionAsync(ADC_chainAsync_t *chainAsync);
-
 #endif /* ADC_INTERFACE_H_ */

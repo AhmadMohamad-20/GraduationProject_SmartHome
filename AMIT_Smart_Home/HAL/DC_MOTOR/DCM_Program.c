@@ -14,6 +14,10 @@
 #include "DCM_Private.h"
 #include "DCM_Interface.h"
 
+void DCM_init(void)
+{
+	DIO_setPinDirection(DCM_PORT,DCM_PIN,OUTPUT);
+}
 
 StdReturnType DCM_turnOn(void)
 {

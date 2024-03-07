@@ -42,8 +42,16 @@ void UART_Transmit(uint8 Copy_Data)
 }
 uint8 UART_Receive(void)
 {
+	uint8 local_counter = 0;
 
-	while((GET_BIT(UCSRA,RXC)) == 0);
+	while((((GET_BIT(UCSRA,RXC)) == 0) && (local_counter < 50)))
+	{
+		local_counter++;
+	}
+	if(local_counter == 50)
+	{
+		return 0;
+	}
 
 	return UDR;
 }

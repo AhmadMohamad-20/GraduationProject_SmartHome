@@ -7,6 +7,7 @@
 #include "../../LIBRARIES/STD_Types.h"
 #include "../../LIBRARIES/bitmath.h"
 
+#include "../DIO/DIO_Interface.h"
 #include "../G_INT/GINT_Interface.h"
 
 #include "ADC_Reg.h"

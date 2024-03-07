@@ -44,4 +44,5 @@ void adminSetupModeCheck(void);
 //void ac_controlCheck(void);
 void door_controlCheck(void);
 void led_controlCheck(void);
+void led_controlAdminCheck(void);
 #endif /* MAIN_H_ */

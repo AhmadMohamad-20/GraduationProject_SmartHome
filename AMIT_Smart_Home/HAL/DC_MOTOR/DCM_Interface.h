@@ -8,6 +8,10 @@
 #ifndef HAL_DC_MOTOR_DCM_INTERFACE_H_
 #define HAL_DC_MOTOR_DCM_INTERFACE_H_
 
+#define DCM_PORT DIO_PORTD
+#define DCM_PIN	PIN3
+
+void DCM_init(void);
 StdReturnType DCM_turnOn(void);
 StdReturnType DCM_turnOff(void);
 

@@ -15,11 +15,12 @@
      <ITEM name="Version">100</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="350" x="68" flags="00000032" y="180" h="200" pid="1" iid="-1">
+   <POPUP w="350" x="146" flags="00000033" y="431" h="200" pid="1" iid="-1">
     <PROPERTIES>
      <ITEM name="Address Column Width">82</ITEM>
      <ITEM name="AutoResize">No</ITEM>
      <ITEM name="Gridlines">Yes</ITEM>
+     <ITEM name="Item 0">"TCNT0","0x0052",00000004,0000000D,50,1,2,1E480000,0,00000000,00000000</ITEM>
      <ITEM name="Name Column Width">82</ITEM>
      <ITEM name="ShowAddresses">Yes</ITEM>
      <ITEM name="ShowPreviousValues">No</ITEM>
@@ -29,7 +30,7 @@
      <ITEM name="Value Column Width">82</ITEM>
      <ITEM name="Version">100</ITEM>
      <ITEM name="Watch Expression Column Width">82</ITEM>
-     <ITEM name="nItems">0</ITEM>
+     <ITEM name="nItems">1</ITEM>
     </PROPERTIES>
    </POPUP>
    <POPUP w="258" x="88" flags="00000008" y="200" h="255" pid="3" iid="4">
@@ -95,21 +96,31 @@
      <ITEM name="TopLineAddress">00000020</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="600" x="1232" flags="0000802b" y="559" h="400" pid="1" iid="4">
+   <POPUP w="600" x="1229" flags="0000802b" y="630" h="400" pid="1" iid="4">
     <PROPERTIES>
-     <ITEM name="Breakpoint 0">"main",5786,000C,F339,BD94,1
+     <ITEM name="Breakpoint 0">"ADC_startConversionSync",440C,00AC,EC60,4A34,-1
 </ITEM>
-     <ITEM name="Breakpoint 1">"systemInit",57A0,0014,C928,BD94,1
+     <ITEM name="Breakpoint 1">"main",6202,000C,036B,BD94,1
 </ITEM>
-     <ITEM name="Breakpoint 2">"loginToSystem",58F2,014C,2808,BD94,1
+     <ITEM name="Breakpoint 10">"ac_control",77C8,000A,35AC,BD94,1
 </ITEM>
-     <ITEM name="Breakpoint 3">"adminLogIn",5AAC,0134,47F6,BD94,1
+     <ITEM name="Breakpoint 11">"led_control_UART",7BAA,011C,BE92,BD94,1
 </ITEM>
-     <ITEM name="Breakpoint 4">"registerPassWord",5CF2,004A,E599,BD94,1
+     <ITEM name="Breakpoint 2">"main",6206,0010,73BD,BD94,1
 </ITEM>
-     <ITEM name="Breakpoint 5">"registerPassWord",5D0E,0066,B18C,BD94,1
+     <ITEM name="Breakpoint 3">"main",620E,0018,3044,BD94,1
 </ITEM>
-     <ITEM name="Breakpoint 6">"checkPassword",5EA4,0080,B18C,BD94,1
+     <ITEM name="Breakpoint 4">"systemInit",6242,0014,CF09,BD94,1
+</ITEM>
+     <ITEM name="Breakpoint 5">"loginToSystem",642A,014C,2808,BD94,1
+</ITEM>
+     <ITEM name="Breakpoint 6">"adminLogIn",684E,0132,1426,BD94,1
+</ITEM>
+     <ITEM name="Breakpoint 7">"registerPassWord",6E62,004A,E599,BD94,1
+</ITEM>
+     <ITEM name="Breakpoint 8">"registerPassWord",6E7E,0066,D589,BD94,1
+</ITEM>
+     <ITEM name="Breakpoint 9">"checkPassword",7068,0080,D589,BD94,1
 </ITEM>
      <ITEM name="CaseSensitive">No</ITEM>
      <ITEM name="DISPADDRS">Yes</ITEM>
@@ -117,7 +128,7 @@
      <ITEM name="DISPOPCODES">No</ITEM>
      <ITEM name="FIXUPBPTS">Yes</ITEM>
      <ITEM name="WordsOnly">No</ITEM>
-     <ITEM name="nBreakpoints">7</ITEM>
+     <ITEM name="nBreakpoints">12</ITEM>
     </PROPERTIES>
    </POPUP>
    <POPUP w="886" x="86" flags="0000000b" y="584" h="361" pid="2" iid="4">
@@ -137,7 +148,7 @@
      <ITEM name="nItems">0</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="20" x="1166" flags="0000000b" y="88" h="32" pid="101" iid="5">
+   <POPUP w="20" x="350" flags="0000000a" y="392" h="32" pid="101" iid="5">
     <PROPERTIES>
      <ITEM name="DataType">2</ITEM>
      <ITEM name="DispChars">Yes</ITEM>
@@ -145,6 +156,12 @@
      <ITEM name="ShowChanges">Yes</ITEM>
      <ITEM name="ShowToolTips">Yes</ITEM>
      <ITEM name="TopLineAddress">00000000</ITEM>
+    </PROPERTIES>
+   </POPUP>
+   <POPUP w="450" x="0" flags="00000023" y="224" h="250" pid="0" iid="33">
+    <PROPERTIES>
+     <ITEM name="AutoEcho">0</ITEM>
+     <ITEM name="HexMode">0</ITEM>
     </PROPERTIES>
    </POPUP>
   </PWI>

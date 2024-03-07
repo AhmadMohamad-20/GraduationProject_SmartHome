@@ -9,6 +9,7 @@
 #include <string.h>
 #include "LIBRARIES/STD_Types.h"
 #include "LIBRARIES/bitmath.h"
+#include "MCAL/UART/UART_interface.h"
 #include "HAL/LED/LED_Interface.h"
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
@@ -19,7 +20,7 @@
 #include "HAL/ServoMotor/SM_Interface.h"
 #include "HAL/DC_MOTOR/DCM_Interface.h"
 #include "HAL/DIMMER/DIM_Interface.h"
-#include "MCAL/UART/UART_interface.h"
+#include "HAL/BUZZER/BUZZER_Interface.h"
 #include "main.h"
 
 uint8 ID[3] = {0};
@@ -28,7 +29,7 @@ uint8 password[4] = {0};
 uint8 savedPassword[4] = {0};
 static uint8 usersNum = 0;
 static uint8 selector = 0;
-
+static uint8 checkk = 0;
 static uint8 checkLatestUser(void);
 static void registerPassWord(void);
 static void registerAdminPassWord(void);
@@ -49,15 +50,22 @@ int main(void)
 	/* initialize System */
 	systemInit();
 	loginToSystem();
-	showOptions();
-	RTOS_start();
+	if (checkk == CORRECT_PASSWORD)
+	{
+		showOptions();
+		RTOS_start();
+		while(1);
+	}
+	else if (checkk == INCORRECT_PASSWORD)
+	{
+		BUZZER_ON();
+	}
+
+
 	//SM_rotateAngle(50);
 	//_delay_ms(1550);
 	//SM_rotateAngle(70);
-	while(1)
-	{
 
-	}
 }
 
 void systemInit(void)
@@ -70,7 +78,9 @@ void systemInit(void)
 	RTOS_addTask(1,1,0,adminSetupModeCheck);
 	RTOS_addTask(2,1,0,ac_control);
 	RTOS_addTask(3,1,0,led_controlCheck);
-	RTOS_addTask(4,1,0,door_controlCheck);
+	RTOS_addTask(4,1,0,led_controlCheck);
+
+	RTOS_addTask(5,1,0,door_controlCheck);
 	TS_init();
 	LED_init(LED1_PORT,LED1_PIN);
 	LED_init(LED2_PORT,LED2_PIN);
@@ -78,6 +88,7 @@ void systemInit(void)
 	LED_init(LED4_PORT,LED4_PIN);
 	LED_init(LED5_PORT,LED5_PIN);
 	LED_init(LED6_PORT,LED6_PIN);
+	BUZZER_init();
 }
 
 void loginToSystem(void)
@@ -159,18 +170,18 @@ static void adminLogIn(void)
      	- Sign the admin using same password
     */
 
-	if (*savedPassword == '\0')
+	if (*savedPassword == 0xFF)
 	{
 		LCD_clearDisplay_4bit();
 		LCD_sendStringAtAddress_4bit(LCD_ROW1,2,"FIRST TIME !");
 		_delay_ms(1500);
 		registerAdminPassWord();
-		local_checkVal = checkPassword(ADMIN_PASSWORD);
-		if (local_checkVal == INCORRECT_PASSWORD)
+		checkk = checkPassword(ADMIN_PASSWORD);
+		if (checkk == INCORRECT_PASSWORD)
 		{
 
 		}
-		else if (local_checkVal == CORRECT_PASSWORD)
+		else if (checkk == CORRECT_PASSWORD)
 		{
 			LCD_clearDisplay_4bit();
 			LCD_sendString_4bit("WELCOME ADMIN !!");
@@ -185,12 +196,12 @@ static void adminLogIn(void)
 
 	else
 	{
-		local_checkVal = checkPassword(ADMIN_PASSWORD);
-		if (local_checkVal == INCORRECT_PASSWORD)
+		checkk = checkPassword(ADMIN_PASSWORD);
+		if (checkk == INCORRECT_PASSWORD)
 		{
 
 		}
-		else if (local_checkVal == CORRECT_PASSWORD)
+		else if (checkk == CORRECT_PASSWORD)
 		{
 			LCD_clearDisplay_4bit();
 			LCD_sendString_4bit("WELCOME ADMIN !!");
@@ -204,7 +215,7 @@ static void userLogIn(void)
 	uint8 localCheck = 0;
 	uint8 local_counter = 0;
 	uint8 local_buttonVal = 0;
-	uint8 checkk = 0;
+
 	/* Sign the user ID and Password */
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("ID : ");
@@ -515,6 +526,27 @@ void led_controlCheck(void)
 		}
 }
 
+void led_controlAdminCheck(void)
+{
+	uint8 local_choice = 0;
+	uint8 local_counter = 0;
+
+	local_choice = BM_recieveByte();
+	while ((local_counter < MAX_TIME) && (local_choice != '4'))
+	{
+		local_counter++;
+		local_choice = BM_recieveByte();
+	}
+
+	if (local_choice == '4')
+	{
+		led_control_UART();
+	}
+	else
+	{
+		/* NOTHING */
+	}
+}
 static void adminSetupMode(void)
 {
 	uint8 userSetting = 0;
@@ -548,6 +580,7 @@ static void ac_control(void)
 	uint8 AC_Temp = 0;
 	//LCD_clearDisplay_4bit();
 	AC_Temp = TS_sendData();
+
 	if (AC_Temp >= MAX_TEMP)
 	{
 		DCM_turnOn();
@@ -556,7 +589,7 @@ static void ac_control(void)
 	{
 		DCM_turnOff();
 	}
-	showOptions();
+	//showOptions();
 	RTOS_start();
 }
 
