@@ -7,10 +7,8 @@
 
 #include <util/delay.h>
 #include <string.h>
-
 #include "LIBRARIES/STD_Types.h"
 #include "LIBRARIES/bitmath.h"
-
 #include "HAL/LED/LED_Interface.h"
 #include "HAL/KEYPAD/KEYPAD_Interfacing.h"
 #include "HAL/LCD/LCD_Interface.h"
@@ -21,9 +19,10 @@
 #include "HAL/ServoMotor/SM_Interface.h"
 #include "HAL/DC_MOTOR/DCM_Interface.h"
 #include "HAL/DIMMER/DIM_Interface.h"
+#include "MCAL/UART/UART_interface.h"
 #include "main.h"
 
-uint8 ID[3] = {0};            // changed char to uint8
+uint8 ID[3] = {0};            
 uint8 savedID[3] = {0};
 uint8 password[4] = {0};
 uint8 savedPassword[4] = {0};
@@ -33,12 +32,11 @@ static uint8 selector = 0;
 static uint8 checkLatestUser(void);
 static void registerPassWord(void);
 static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location);
+void loginToSystem (void);
 static void adminLogIn(void);
 static void userLogIn(void);
 //static uint8 passwordCompare(void);
 static uint8 checkUserID(void);
-//static void checkUserPassword(void);
-
 static void adminSetupMode(void);
 static void ac_control(void);
 static void door_control(void);
@@ -48,7 +46,6 @@ int main(void)
 {
 	/* initialize System */
 	systemInit();
-	
 	loginToSystem();
 	showOptions();
 	RTOS_start();
@@ -83,7 +80,7 @@ void systemInit(void)
 
 void loginToSystem(void)
 {
-	/* Choose who will sign => User or Admin*/
+	/* Choose who will sign => User or Admin */
 	LCD_clearDisplay_4bit();
 	LCD_sendStringAtAddress_4bit(LCD_ROW1,3,"WELCOME !!");
 	_delay_ms(1500);
@@ -359,42 +356,35 @@ static uint8 checkUserID(void)
 	}
 }
 
-/*
-static void checkUserPassword(void)
-{
-	uint8 localCheck = 0;
-
-	localCheck = checkPassword();
-	if (localCheck == INCORRECT_PASSWORD)
-	{
-
-	}
-	else if (localCheck == CORRECT_PASSWORD)
-	{
-
-	}
-}
-*/
-
 void add_user(void)
 {
 
 	static uint8 usersCounter = 0;
 	usersCounter = checkLatestUser();
-	/* send by bluetooth to mobile app "Enter User ID"*/
+	/* send by bluetooth to mobile app "Enter User ID" and display it on lcd*/
+	LCD_clearDisplay_4bit();
+	LCD_sendString_4bit("Enter User ID ");
+	UART_sendString("Enter User ID ");
 	/*Read from mobile and save it in ID Array*/
+	UART_recieve_string(ID);
+	/*Save the ID in EEPROM*/
 	EEPROM_voidSend4Numbers( USER1_ID+ 0x10 * usersCounter , ID , MAX_SIZE_ID);
-	/* send by bluetooth to mobile app "Enter User ID"*/
+	/* send by bluetooth to mobile app "Enter User password"*/
+	LCD_clearDisplay_4bit();
+	LCD_sendString_4bit("Enter Password ");
+	UART_sendString("Enter Password ");
+	/*Read from mobile and save it in Password Array*/
+	UART_recieve_string(password);
 	/*Read from mobile and save it in password array*/
+	/*Save the password in EEPROM*/
 	EEPROM_voidSend4Numbers( USER1_PASSWORD+10*usersCounter , password , MAX_SIZE_PASSWORD);
 }
 
-
+/* To delete user you have to send the user id to RemoveUser function */
 void RemoveUser(uint8* copy_userID)
 {   /* this function deletes 8 consequent locations (ID + Password) in eeprom */
-	uint8 i=0;
 	uint8 local_temp_ID_Arr[4]={0};
-
+	uint8 i=0;
 	for(i=0;i<MAX_USER_NUM;i++)
 	{
 		EEPROM_voidRead4Numbers(USER1_ID+10*i ,local_temp_ID_Arr,4);
@@ -407,44 +397,17 @@ void RemoveUser(uint8* copy_userID)
 		{
 			/*remove user id and password*/
 			EEPROM_voidRemoveUser(USER1_ID + 0x10 * i);
+			LCD_sendString_4bit("User's been deleted Successfully");
+			UART_sendString("User's been deleted Successfully");
 			break;
 		}
 	}
 	if (i == (MAX_USER_NUM - 1))
 	{
 		/*Send by uart "ID does not exist"*/
+		LCD_sendString_4bit("ID does not exist");
+		UART_sendString("ID does not exist");
 	}
-	/*
-	uint8* localID=copy_userID;
-		if(localID[0]==EEPROM_uint8ReadDataByte(USER1_ID) &&
-			localID[1]==EEPROM_uint8ReadDataByte(USER1_ID+1)&&
-			localID[2]==EEPROM_uint8ReadDataByte(USER1_ID+2)&&
-			localID[3]==EEPROM_uint8ReadDataByte(USER1_ID+3))
-		{
-			EEPROM_voidRemoveUser(USER1_ID);
-		}
-		else if(localID[0]==EEPROM_uint8ReadDataByte(USER2_ID) &&
-			localID[1]==EEPROM_uint8ReadDataByte(USER2_ID+1)&&
-			localID[2]==EEPROM_uint8ReadDataByte(USER2_ID+2)&&
-			localID[3]==EEPROM_uint8ReadDataByte(USER2_ID+3))
-		{
-			EEPROM_voidRemoveUser(USER2_ID);
-		}
-		else if(localID[0]==EEPROM_uint8ReadDataByte(USER3_ID) &&
-				localID[1]==EEPROM_uint8ReadDataByte(USER3_ID+1)&&
-				localID[2]==EEPROM_uint8ReadDataByte(USER3_ID+2)&&
-				localID[3]==EEPROM_uint8ReadDataByte(USER3_ID+3))
-			{
-				EEPROM_voidRemoveUser(USER3_ID);
-			}
-	 */
-	/*
-		else
-		{
-			//Send by uart "ID does not exist"
-		}
-		*/
-
 }
 
 void adminSetupModeCheck(void)
@@ -472,7 +435,6 @@ void ac_controlCheck(void)
 {
 	uint8 local_choice = 0;
 	uint8 local_counter = 0;
-
 
 	local_choice = KEYPAD_getValue();
 	while ((local_counter < MAX_TIME) && (local_choice != '2'))
@@ -538,18 +500,26 @@ void led_controlCheck(void)
 static void adminSetupMode(void)
 {
 	uint8 userSetting = 0;
+	uint8 Local_tempID_Array[MAX_SIZE_ID]={0};
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("1 => ADD USER");
-	LCD_sendStringAtAddress_4bit("2 => REMOVE USER");
-
+	LCD_sendStringAtAddress_4bit(2,0,"2 => REMOVE USER");
+	UART_sendString("1 => ADD USER");
+	_delay_ms(200);
+	UART_sendString("2 => REMOVE USER");
 	/* UART RECIEVE*/
+	userSetting = UART_Receive();
 	if (userSetting == '1')
 	{
 		add_user();
 	}
 	else if (userSetting == '2')
 	{
-		RemoveUser();
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("Delete > Enter ID");
+		UART_sendString("Delete > Enter ID");
+		UART_recieve_string(Local_tempID_Array);
+		RemoveUser(Local_tempID_Array);
 	}
 	showOptions();
 	RTOS_start();
