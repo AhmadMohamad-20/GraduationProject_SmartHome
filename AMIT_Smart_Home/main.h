@@ -11,7 +11,7 @@
 #define ADMIN_SELECTED	0x31
 #define USER_SELECTED	0x32
 
-#define ADMIN_PASSWORD	0x04
+#define ADMIN_PASSWORD	0x00
 
 #define USER1_ID		0x30
 #define USER1_PASSWORD	0x34

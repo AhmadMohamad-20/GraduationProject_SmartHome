@@ -44,14 +44,7 @@ uint8 UART_Receive(void)
 {
 	uint8 local_counter = 0;
 
-	while((((GET_BIT(UCSRA,RXC)) == 0) && (local_counter < 50)))
-	{
-		local_counter++;
-	}
-	if(local_counter == 50)
-	{
-		return 0;
-	}
+	while(((GET_BIT(UCSRA,RXC)) == 0));
 
 	return UDR;
 }
@@ -75,14 +68,14 @@ void UART_sendString(char *copy_UART_ptr)
 void  UART_recieve_string(uint8 * copy_UART_ptr)
 {
 	uint8 i=0;
-	uint8* local_ptr=copy_UART_ptr;
-	if(local_ptr != NULL)
+	//uint8* local_ptr = copy_UART_ptr;
+	if(copy_UART_ptr != NULL)
 	{
-		local_ptr[i]=UART_Receive();
-		while(local_ptr[i] != 0x0D) // Enter key =0x0D in Ascii
+		copy_UART_ptr[i]=UART_Receive();
+		while(copy_UART_ptr[i] != 0x0D) // Enter key =0x0D in Ascii
 		{
 			i++;
-			local_ptr[i]=UART_Receive();
+			copy_UART_ptr[i]=UART_Receive();
 		}
 	}
 	else

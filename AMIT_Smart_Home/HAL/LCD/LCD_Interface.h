@@ -29,14 +29,7 @@
 #define LCD_ROW1	1
 #define LCD_ROW2	2
 
-void LCD_init8bit(void);
 void LCD_init4bit(void);
-uint8 LCD_sendCommand_8bit(uint8 copy_LCD_command);
-uint8 LCD_sendData_8bit(uint8 copy_LCD_data);
-uint8 LCD_init_8bit(void);
-uint8 LCD_sendDataAtAddress_8bit(uint8 copy_LCD_row, uint8 copy_LCD_column,uint8 copy_LCD_data);
-uint8 LCD_sendString_8bit(const char *copy_LCD_str);
-uint8 LCD_sendStringAtAddress_8bit(uint8 copy_LCD_row, uint8 copy_LCD_column,const char *copy_LCD_string);
 
 uint8 LCD_sendCommand_4bit(uint8 copy_LCD_command);
 uint8 LCD_sendData_4bit(uint8 copy_LCD_data);

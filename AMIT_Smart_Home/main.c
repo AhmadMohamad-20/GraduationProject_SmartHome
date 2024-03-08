@@ -6,7 +6,6 @@
  */
 
 #include <util/delay.h>
-#include <string.h>
 #include "LIBRARIES/STD_Types.h"
 #include "LIBRARIES/bitmath.h"
 #include "MCAL/UART/UART_interface.h"
@@ -31,6 +30,7 @@ static uint8 usersNum = 0;
 static uint8 selector = 0;
 static uint8 checkk = 0;
 
+uint8 stringCompare(uint8* str1, uint8* str2, uint8 Num);
 static uint8 checkLatestUser(void);
 static void registerPassWord(void);
 static void registerAdminPassWord(void);
@@ -50,7 +50,29 @@ int main(void)
 {
 	/* initialize System */
 	systemInit();
+	//UART_recieve_string(savedPassword);
+	//if(savedPassword[0]=='1' && savedPassword[3]=='4')
+	uint8 x=UART_Receive();
+	if (x=='m')
+	{
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("OKAAAY");
+		_delay_ms(5000);
+	}
+	else if(x=='\0')
+	{
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("NOOOOOO");
+		_delay_ms(5000);
+	}
+	else
+	{
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("A7OOOO");
+		_delay_ms(5000);
+	}
 	loginToSystem();
+
 	if (checkk == CORRECT_PASSWORD)
 	{
 		showOptions();
@@ -61,9 +83,7 @@ int main(void)
 	{
 		BUZZER_ON();
 	}
-	//SM_rotateAngle(50);
-	//_delay_ms(1550);
-	//SM_rotateAngle(70);
+
 }
 
 void systemInit(void)
@@ -233,7 +253,7 @@ static void userLogIn(void)
 	}
 	_delay_ms(100);
 
-	/* Check if the user ID is present or Not 
+	/* Check if the user ID is present or Not
   		NOTE : THE ID has 3 Numbers
     	*/
 	localCheck = checkUserID();
@@ -288,9 +308,6 @@ static void registerPassWord(void)
 }
 static void registerAdminPassWord(void)
 {
-	uint8 local_counter = 0;
-	uint8 local_buttonVal = 0;
-
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("PASSWORD : ");
 	UART_sendString("PASSWORD: ");
@@ -326,7 +343,7 @@ static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location)
 	}
 	_delay_ms(100);
 	/* compare the typed password with the stored password */
-	local_check = strncmp((char *)password, (char *)savedPassword, MAX_SIZE_PASSWORD);
+	local_check = stringCompare(password, savedPassword, MAX_SIZE_PASSWORD);
 	while ((local_check != 0) && (local_counterCheck))
 	{
 		/* DISPLAY INVALID PASSWORD AND ENTER PASSWORD AGAIN FOR 3 TIMES*/
@@ -349,7 +366,7 @@ static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location)
 		}
 		local_counterCheck--;
 	}
-	if (strncmp((char *)password, (char *)savedPassword, MAX_SIZE_PASSWORD))
+	if (stringCompare(password, savedPassword, MAX_SIZE_PASSWORD))
 	{
 		return INCORRECT_PASSWORD;
 	}
@@ -373,7 +390,8 @@ static uint8 checkPasswordAdmin(uint16 copy_u16EEPROM_PASS_Location)
 		UART_recieve_string(password);
 		LCD_sendString_4bit("****");
 		EEPROM_voidRead4Numbers(copy_u16EEPROM_PASS_Location, savedPassword,MAX_SIZE_PASSWORD);
-		if (strncmp(password,savedPassword, MAX_SIZE_PASSWORD))
+		//if (strncmp(password,savedPassword, MAX_SIZE_PASSWORD))
+		if (stringCompare(password,savedPassword, MAX_SIZE_PASSWORD))
 		{
 			trials--;
 			LCD_clearDisplay_4bit();
@@ -401,7 +419,7 @@ static uint8 checkUserID(void)
 		for (; local_counter < usersNum; local_counter++)
 		{
 			EEPROM_voidRead4Numbers((USER1_ID + (0x10 * local_counter)),savedID, MAX_SIZE_ID);
-			localCheck = strncmp((char *)ID,(char *)savedID,MAX_SIZE_ID);
+			localCheck = stringCompare(ID,savedID,MAX_SIZE_ID);
 			if (localCheck != 0)
 			{
 				continue;
@@ -447,7 +465,7 @@ void RemoveUser(uint8* copy_userID)
 	{
 		EEPROM_voidRead4Numbers(USER1_ID+10*i ,local_temp_ID_Arr,4);
 		/*check if id exist?*/
-		if (strncmp((char *)copy_userID, (char *)local_temp_ID_Arr, MAX_SIZE_PASSWORD)!= 0 )
+		if (stringCompare(copy_userID, local_temp_ID_Arr, MAX_SIZE_PASSWORD)!= 0 )
 		{
 			continue;
 		}
@@ -742,4 +760,21 @@ static void led_control_UART(void)
 	}
 	showOptions();
 	RTOS_start();
+}
+
+uint8 stringCompare(uint8* str1, uint8* str2, uint8 Num)
+{
+	uint8 i=0;
+	for(i=0;i<Num;i++)
+	{
+		if (str1[i]==str2[i])
+		{
+			continue;
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
