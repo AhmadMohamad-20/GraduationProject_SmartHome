@@ -56,7 +56,7 @@ uint8 UART_Receive(void)
 	return UDR;
 }
 
-void UART_sendString(uint8 *copy_UART_ptr)
+void UART_sendString(char *copy_UART_ptr)
 {
 	if (copy_UART_ptr != NULL)
 	{

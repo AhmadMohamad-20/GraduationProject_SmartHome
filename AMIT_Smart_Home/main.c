@@ -39,7 +39,6 @@ static uint8 checkPasswordAdmin(uint16 copy_u16EEPROM_PASS_Location);
 void loginToSystem (void);
 static void adminLogIn(void);
 static void userLogIn(void);
-//static uint8 passwordCompare(void);
 static uint8 checkUserID(void);
 static void adminSetupMode(void);
 static void ac_control(void);
@@ -62,16 +61,14 @@ int main(void)
 	{
 		BUZZER_ON();
 	}
-
-
 	//SM_rotateAngle(50);
 	//_delay_ms(1550);
 	//SM_rotateAngle(70);
-
 }
 
 void systemInit(void)
 {
+	UART_Init();
 	KEYPAD_init();
 	LCD_init_4bit();
 	EEPROM_INIT();
@@ -161,7 +158,6 @@ static uint8 checkLatestUser(void)
 static void adminLogIn(void)
 {
 
-	uint8 local_checkVal = 0;
 	EEPROM_voidRead4Numbers(ADMIN_PASSWORD, savedPassword, MAX_SIZE_PASSWORD);
 
 	/* if there is no password for admin , it will :
@@ -176,10 +172,11 @@ static void adminLogIn(void)
 		LCD_sendStringAtAddress_4bit(LCD_ROW1,2,"FIRST TIME !");
 		_delay_ms(1500);
 		registerAdminPassWord();
-		checkk = checkPassword(ADMIN_PASSWORD);
+		checkk = checkPasswordAdmin(ADMIN_PASSWORD);
 		if (checkk == INCORRECT_PASSWORD)
 		{
-
+			LCD_clearDisplay_4bit();
+			LCD_sendString_4bit("System Fail !!");
 		}
 		else if (checkk == CORRECT_PASSWORD)
 		{
@@ -199,13 +196,15 @@ static void adminLogIn(void)
 		checkk = checkPasswordAdmin(ADMIN_PASSWORD);
 		if (checkk == INCORRECT_PASSWORD)
 		{
-
+			LCD_clearDisplay_4bit();
+			LCD_sendString_4bit("System Fail !!");
 		}
 		else if (checkk == CORRECT_PASSWORD)
 		{
 			LCD_clearDisplay_4bit();
 			LCD_sendString_4bit("WELCOME ADMIN !!");
 			_delay_ms(1500);
+
 		}
 	}
 }
@@ -294,7 +293,7 @@ static void registerAdminPassWord(void)
 
 	LCD_clearDisplay_4bit();
 	LCD_sendString_4bit("PASSWORD : ");
-	UART_sendString("ENTER A PASSWORD");
+	UART_sendString("PASSWORD: ");
 	LCD_setCursorAt_4bit(LCD_ROW1,12);
 	LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
 	UART_recieve_string(password);
@@ -362,15 +361,31 @@ static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location)
 
 static uint8 checkPasswordAdmin(uint16 copy_u16EEPROM_PASS_Location)
 {
-	registerAdminPassWord();
-	if (strncmp((char *)password, (char *)savedPassword, MAX_SIZE_PASSWORD))
+	//registerAdminPassWord();
+	uint8 trials=3;
+	while(trials !=0)
 	{
-		return INCORRECT_PASSWORD;
+		LCD_clearDisplay_4bit();
+		LCD_sendString_4bit("PASSWORD: ");
+		UART_sendString("PASSWORD: ");
+		LCD_setCursorAt_4bit(LCD_ROW2,5);
+		LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
+		UART_recieve_string(password);
+		LCD_sendString_4bit("****");
+		EEPROM_voidRead4Numbers(copy_u16EEPROM_PASS_Location, savedPassword,MAX_SIZE_PASSWORD);
+		if (strncmp(password,savedPassword, MAX_SIZE_PASSWORD))
+		{
+			trials--;
+			LCD_clearDisplay_4bit();
+			LCD_sendString_4bit("Wrong PASSWORD! ");
+			_delay_ms(500);
+		}
+		else
+		{
+			return CORRECT_PASSWORD;
+		}
 	}
-	else
-	{
-		return CORRECT_PASSWORD;
-	}
+	return INCORRECT_PASSWORD;
 }
 
 static uint8 checkUserID(void)

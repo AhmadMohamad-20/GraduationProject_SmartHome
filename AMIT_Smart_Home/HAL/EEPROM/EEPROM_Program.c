@@ -11,7 +11,6 @@
 #include "../../LIBRARIES/bitmath.h"
 
 #include "../../MCAL/IIC/TWI_Interface.h"
-
 #include "EEPROM_Config.h"
 #include "EEPROM_Private.h"
 #include "EEPROM_Interface.h"
@@ -89,7 +88,7 @@ void EEPROM_voidSend4Numbers(uint16 Copy_uint16LocationAddress, uint8* Array_Rec
 	{
 		EEPROM_voidSendDataByte(Copy_uint16LocationAddress,*local_ptrArr);
 		Copy_uint16LocationAddress++;
-		local_ptrArr += 1;
+		local_ptrArr++;
 	}
 }
 
