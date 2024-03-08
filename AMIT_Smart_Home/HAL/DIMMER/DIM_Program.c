@@ -14,7 +14,7 @@
 void DIMMER_start(uint8 copy_DIMMER_dutyCycle)
 {
 	uint8 compareValue = 0;
-	compareValue = ((uint16)copy_DIMMER_dutyCycle * 256UL) / 10;
+	compareValue = (uint16)(copy_DIMMER_dutyCycle * 256UL) / 10;
 	TIMER2_initFastPWM(compareValue,T2_OC_CLEAR_ON_CMP);
 	TIMER2_startTimer(T2_1024_PRESCALING);
 }

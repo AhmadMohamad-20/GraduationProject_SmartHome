@@ -52,16 +52,19 @@ void RTOS_addTask(uint8 copy_uint8_priority, uint16 copy_uint16_periodicity, uin
 
 void RTOS_suspendTask(uint8 copy_RTOS_priority)
 {
+	copy_RTOS_priority--;
 	systemTasks[copy_RTOS_priority].taskstate = TASK_SUSPENDED;
 }
 
 void RTOS_resumeTask(uint8 copy_RTOS_priority)
 {
+	copy_RTOS_priority--;
 	systemTasks[copy_RTOS_priority].taskstate = TASK_RUNNING;
 }
 
 void RTOS_removeTask(uint8 copy_RTOS_priority)
 {
+	copy_RTOS_priority--;
 	systemTasks[copy_RTOS_priority].taskFunc = NULL;
 }
 

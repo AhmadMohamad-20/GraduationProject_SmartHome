@@ -30,10 +30,12 @@ uint8 savedPassword[4] = {0};
 static uint8 usersNum = 0;
 static uint8 selector = 0;
 static uint8 checkk = 0;
+
 static uint8 checkLatestUser(void);
 static void registerPassWord(void);
 static void registerAdminPassWord(void);
 static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location);
+static uint8 checkPasswordAdmin(uint16 copy_u16EEPROM_PASS_Location);
 void loginToSystem (void);
 static void adminLogIn(void);
 static void userLogIn(void);
@@ -78,9 +80,9 @@ void systemInit(void)
 	RTOS_addTask(1,1,0,adminSetupModeCheck);
 	RTOS_addTask(2,1,0,ac_control);
 	RTOS_addTask(3,1,0,led_controlCheck);
-	RTOS_addTask(4,1,0,led_controlCheck);
-
+	RTOS_addTask(4,1,0,led_controlAdminCheck);
 	RTOS_addTask(5,1,0,door_controlCheck);
+
 	TS_init();
 	LED_init(LED1_PORT,LED1_PIN);
 	LED_init(LED2_PORT,LED2_PIN);
@@ -123,6 +125,7 @@ void showOptions(void)
 	switch (selector)
 	{
 	case ADMIN_SELECTED:
+		RTOS_suspendTask(3);
 		LCD_clearDisplay_4bit();
 		LCD_sendStringAtAddress_4bit(LCD_ROW1,3,"OPTIONS !!");
 		_delay_ms(1500);
@@ -130,17 +133,14 @@ void showOptions(void)
 		LCD_sendString_4bit("1=>SETUP");
 		LCD_sendStringAtAddress_4bit(1,11,"2=>LED");
 		LCD_sendStringAtAddress_4bit(2,1,"3=>DOOR");
-
-
 		break;
+
 	case USER_SELECTED:
 		RTOS_suspendTask(1);
 		RTOS_suspendTask(4);
+		RTOS_suspendTask(5);
 		LCD_clearDisplay_4bit();
-		LCD_sendStringAtAddress_4bit(LCD_ROW1,3,"OPTIONS !!");
-		_delay_ms(1500);
-		LCD_sendStringAtAddress_4bit(1,1,"1=>LED");
-
+		LCD_sendString_4bit("TO CONTROL LED => 1");
 		break;
 	}
 
@@ -196,7 +196,7 @@ static void adminLogIn(void)
 
 	else
 	{
-		checkk = checkPassword(ADMIN_PASSWORD);
+		checkk = checkPasswordAdmin(ADMIN_PASSWORD);
 		if (checkk == INCORRECT_PASSWORD)
 		{
 
@@ -293,15 +293,16 @@ static void registerAdminPassWord(void)
 	uint8 local_buttonVal = 0;
 
 	LCD_clearDisplay_4bit();
-	LCD_sendString_4bit("ENTER A PASSWORD");
+	LCD_sendString_4bit("PASSWORD : ");
 	UART_sendString("ENTER A PASSWORD");
+	LCD_setCursorAt_4bit(LCD_ROW1,12);
+	LCD_sendCommand_4bit(DISPLAY_CURSOR_BLINKING_ON);
 	UART_recieve_string(password);
 	EEPROM_voidSend4Numbers(ADMIN_PASSWORD,password,MAX_SIZE_PASSWORD);
-	LCD_setCursorAt_4bit(LCD_ROW2,6);
 	LCD_sendString_4bit("****");
 }
 
-static uint8 checkPassword (uint16 copy_u16EEPROM_PASS_Location)
+static uint8 checkPassword(uint16 copy_u16EEPROM_PASS_Location)
 {
 	uint8 local_counter = 0;
 	uint8 local_buttonVal = 0;
@@ -349,6 +350,19 @@ static uint8 checkPassword (uint16 copy_u16EEPROM_PASS_Location)
 		}
 		local_counterCheck--;
 	}
+	if (strncmp((char *)password, (char *)savedPassword, MAX_SIZE_PASSWORD))
+	{
+		return INCORRECT_PASSWORD;
+	}
+	else
+	{
+		return CORRECT_PASSWORD;
+	}
+}
+
+static uint8 checkPasswordAdmin(uint16 copy_u16EEPROM_PASS_Location)
+{
+	registerAdminPassWord();
 	if (strncmp((char *)password, (char *)savedPassword, MAX_SIZE_PASSWORD))
 	{
 		return INCORRECT_PASSWORD;
@@ -448,7 +462,7 @@ void adminSetupModeCheck(void)
 		while ((local_counter < MAX_TIME) && (local_choice != '1'))
 		{
 			local_counter++;
-			local_choice = KEYPAD_getValue();
+			local_choice = BM_recieveByte();
 		}
 		if (local_choice == '1')
 		{
@@ -485,13 +499,13 @@ void ac_controlCheck(void)
 void door_controlCheck(void)
 {
 	uint8 local_choice = 0;
-		uint8 local_counter = 0;
+	uint8 local_counter = 0;
 
 		local_choice = KEYPAD_getValue();
 		while (((local_counter < MAX_TIME) && (local_choice != '3')))
 		{
 			local_counter++;
-			local_choice = KEYPAD_getValue();
+			local_choice = BM_recieveByte();
 		}
 
 		if (local_choice == '3')
@@ -507,23 +521,23 @@ void door_controlCheck(void)
 void led_controlCheck(void)
 {
 	uint8 local_choice = 0;
-		uint8 local_counter = 0;
+	uint8 local_counter = 0;
 
+	local_choice = KEYPAD_getValue();
+	while ((local_counter < MAX_TIME) && (local_choice != '4'))
+	{
+		local_counter++;
 		local_choice = KEYPAD_getValue();
-		while ((local_counter < MAX_TIME) && (local_choice != '4'))
-		{
-			local_counter++;
-			local_choice = KEYPAD_getValue();
-		}
+	}
 
-		if (local_choice == '4')
-		{
-			led_control();
-		}
-		else
-		{
-			/* NOTHING */
-		}
+	if (local_choice == '4')
+	{
+		led_control();
+	}
+	else
+	{
+		/* NOTHING */
+	}
 }
 
 void led_controlAdminCheck(void)
@@ -612,7 +626,7 @@ static void door_control(void)
 	if (localDoorController == DOOR_OPEN)
 	{
 		LCD_clearDisplay_4bit();
-		LCD_sendString_4bit("DOOR OPEN");
+		LCD_sendString_4bit("   DOOR OPEN");
 		SM_rotateAngle(90);
 	}
 	else if (localDoorController == DOOR_CLOSED)
@@ -702,7 +716,7 @@ static void led_control_UART(void)
 		LCD_clearDisplay_4bit();
 		LCD_sendString_4bit("CHOOSE BRIGHT LEVEL");
 		LCD_sendStringAtAddress_4bit(LCD_ROW2,1,"(0 - 9)");
-		UART_sendString("CHOOSE BRIGHT LEVEL from 0-9 ");
+		UART_sendString("CHOOSE BRIGHT LEVEL from 0 - 9 ");
 		brightnessLevel = UART_Receive();
 		while (!((brightnessLevel >= '0') && (brightnessLevel <= '9')))
 		{
