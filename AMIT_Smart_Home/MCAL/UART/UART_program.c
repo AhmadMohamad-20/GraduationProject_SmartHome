@@ -42,11 +42,20 @@ void UART_Transmit(uint8 Copy_Data)
 }
 uint8 UART_Receive(void)
 {
-	uint8 local_counter = 0;
+	uint16 local_counter = 0;
 
-	while(((GET_BIT(UCSRA,RXC)) == 0));
-
-	return UDR;
+	while((((GET_BIT(UCSRA,RXC)) == 0) && local_counter < 20000))
+		{
+			local_counter++;
+		}
+	if (local_counter == 20000)
+	{
+		return 0;
+	}
+	else
+	{
+		return UDR;
+	}
 }
 
 void UART_sendString(char *copy_UART_ptr)
