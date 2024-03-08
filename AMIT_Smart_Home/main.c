@@ -50,27 +50,6 @@ int main(void)
 {
 	/* initialize System */
 	systemInit();
-	//UART_recieve_string(savedPassword);
-	//if(savedPassword[0]=='1' && savedPassword[3]=='4')
-	uint8 x=UART_Receive();
-	if (x=='m')
-	{
-		LCD_clearDisplay_4bit();
-		LCD_sendString_4bit("OKAAAY");
-		_delay_ms(5000);
-	}
-	else if(x=='\0')
-	{
-		LCD_clearDisplay_4bit();
-		LCD_sendString_4bit("NOOOOOO");
-		_delay_ms(5000);
-	}
-	else
-	{
-		LCD_clearDisplay_4bit();
-		LCD_sendString_4bit("A7OOOO");
-		_delay_ms(5000);
-	}
 	loginToSystem();
 
 	if (checkk == CORRECT_PASSWORD)
